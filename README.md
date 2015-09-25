@@ -2,7 +2,7 @@ srccheck: a utility to [KALOI](http://structure101.com/2006/10/complexity-debt-d
 
 Pre-requisites
 ===============
-* This utility is written in Python. You will need a Python interpreter installed or you will have to package
+* This utility is written in Python 3. You will need a Python 3 interpreter installed or you will have to package
 this into a self contained executable. 
 * This utility uses [SciTools Understand](https://scitools.com). You will need a valid license of Understand
 in your machine so you can use this script. This script uses a UDB file as input.
