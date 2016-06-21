@@ -31,6 +31,15 @@ The steps are:
 Note that the exit code of this script is the number of violations found. This allows you to incorporate srccheck
 into your workflow regardless of the build tool used.
 
+How to Install It
+=================
+First clone this locally, then:
+
+```
+pip3 install .
+```
+
+
 How to Run It
 =============
 The source code includes a file comment that defines all command-line parameters and what they do. In order to avoid
@@ -53,13 +62,13 @@ Examples
 Here is an example used to analyze Delphi code:
 
 ```
-python srccheck.py --in="C:\temp\PJ_DIARIO.udb" --maxFileMetrics={"CountLineCode":5000,"CountDeclFunction":40,"CountDeclClass":5} --maxClassMetrics={"CountDeclMethod":50,"MaxInheritanceTree":6}
+srccheck --in="C:\temp\PJ_DIARIO.udb" --maxFileMetrics={"CountLineCode":5000,"CountDeclFunction":40,"CountDeclClass":5} --maxClassMetrics={"CountDeclMethod":50,"MaxInheritanceTree":6}
 --maxRoutineMetrics={"CountLineCode":1000,"CountParams":20,"CyclomaticStrict":24,"CyclomaticModified":12} --maxPrjMetrics={"AvgCyclomatic":2,"MaxNesting":5} --regexIgnoreFiles="tlb|[.]dfm" --regexIgnoreRoutines="ExecutaMetodoServidor|Invoke" --verbose
 ```
 
 Here is an example that analyzes C++ code, using the defaults we provide:
 
 ```
-python srccheck.py --in=c:\temp\BlackJack.udb --sonarUser=admin --sonarPass=admin --sonarURL=http://localhost:9000/api/manual_measures --sonarPrj=BlackJack 
+srccheck --in=c:\temp\BlackJack.udb --sonarUser=admin --sonarPass=admin --sonarURL=http://localhost:9000/api/manual_measures --sonarPrj=BlackJack 
 ```
 

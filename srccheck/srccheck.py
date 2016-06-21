@@ -236,8 +236,7 @@ def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
             print ("*** Connection Error connecting to %s" % sonar_url)
             return
 
-
-if __name__ == '__main__':
+def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version='Source Code Checker')
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
@@ -289,3 +288,6 @@ if __name__ == '__main__':
     print ("--------------------------------------------------")
     db.close()
     sys.exit(total_violation_count)
+
+if __name__ == '__main__':
+    main()
