@@ -181,7 +181,7 @@ def process_routine_metrics (db, cmdline_arguments):
 
 def append_dict_with_key_prefix (dict_to_grow, dict_to_append, prefix):
     for k,v in dict_to_append.items():
-        dict_to_grow["%s:%s" % (prefix, k)] = v
+        dict_to_grow["%s %s" % (prefix, k)] = v
 
 
 def _generate_csv (cmdline_arguments, cur_tracked_metrics_for_csv):
@@ -218,7 +218,7 @@ def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
     for metric, value in cur_tracked_metrics.items():
         rest_params = {}
         rest_params["resource"] = sonar_prj
-        rest_params["metric"] = metric.lower() # SONAR wants its key, which is lowercase
+        rest_params["metric"] = metric.lower().replace(" ", "_") # SONAR wants its key, which is lowercase
         rest_params["val"] = value
         try:
             response = requests.post(sonar_url, rest_params, timeout=TIMEOUT, auth=(sonar_user, sonar_pass))

@@ -2,7 +2,7 @@ srccheck: a utility to [KALOI](http://structure101.com/2006/10/complexity-debt-d
 
 Pre-requisites
 ===============
-* This utility is written in Python. You will need a Python interpreter installed or you will have to package
+* This utility is written in Python 3. You will need a Python 3 interpreter installed or you will have to package
 this into a self contained executable. 
 * This utility uses [SciTools Understand](https://scitools.com). You will need a valid license of Understand
 in your machine so you can use this script. This script uses a UDB file as input.
@@ -48,10 +48,10 @@ print the options.
 
 But basically we take 4 different JSONs as input, which define:
 
- * --maxPrjMetrics
- * --maxFileMetrics
- * --maxClassMetrics
- * --maxRoutineMetrics
+ * --maxPrjMetrics , which defines the maximum allowed value for metrics that apply to the project as a whole.
+ * --maxFileMetrics , which defines the maximum allowed value for metrics that apply to individual files.
+ * --maxClassMetrics , which defines the maximum allowed value for metrics that apply to individual classes.
+ * --maxRoutineMetrics , which defines the maximum allowed value for metrics that apply to individual routines (methos, functions, procedures, etc).
  
 These JSONs are each a dictionary, where each key is the name of the metric and the value is the maximum value it can take.
 Anything above is considered a violation. 
@@ -72,3 +72,28 @@ Here is an example that analyzes C++ code, using the defaults we provide:
 srccheck --in=c:\temp\BlackJack.udb --sonarUser=admin --sonarPass=admin --sonarURL=http://localhost:9000/api/manual_measures --sonarPrj=BlackJack 
 ```
 
+Here is a full example which gets srccheck, gets understand, gets the source code for junit,
+invokes understand on its sources and then our tool:
+
+```
+git clone https://github.com/sglebs/srccheck.git
+cd srccheck
+rm -rf tmp
+mkdir tmp
+cd tmp
+wget http://latest.scitools.com/Understand/Understand-4.0.843-Linux-64bit.tgz
+tar xvf Understand-4.0.843-Linux-64bit.tgz
+# make sure und is in the PATH
+export PATH=$PATH:./scitools/bin/linux64/
+git clone https://github.com/junit-team/junit.git
+# run Understand from the GUI to activate the trial
+understand
+# now we can automate
+und create -languages java junit.udb
+und add ./junit/src/main/java/junit junit.udb
+und analyze junit.udb
+virtualenv env -p /usr/bin/python3
+source env/bin/activate
+pip install -r ../requirements.txt
+PYTHONPATH=./scitools/bin/linux64/python python3 ../srccheck.py --in=junit.udb --maxFileMetrics='{"CountLineCode":500,"CountDeclFunction":30,"CountDeclClass":1}' --maxClassMetrics='{"CountDeclMethod":20,"MaxInheritanceTree":4}' --maxRoutineMetrics='{"CountLineCode":80,"CountParams":7,"CyclomaticModified":7}' --maxPrjMetrics='{"AvgCyclomaticModified":3,"MaxNesting":5}' --verbose
+```
