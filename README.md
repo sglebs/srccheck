@@ -33,10 +33,10 @@ into your workflow regardless of the build tool used.
 
 How to Install It
 =================
-First clone this locally, then:
 
+Make sure your Python has paver installed (pip install paver) and then run:
 ```
-pip3 install .
+pip3 install git+https://github.com/sglebs/srccheck
 ```
 
 
