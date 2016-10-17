@@ -34,7 +34,7 @@ into your workflow regardless of the build tool used.
 How to Install It
 =================
 
-Make sure your Python has paver installed (pip install paver) and then run:
+Make sure your Python has paver installed (pip3 install paver) and then run:
 ```
 pip3 install git+https://github.com/sglebs/srccheck
 ```
