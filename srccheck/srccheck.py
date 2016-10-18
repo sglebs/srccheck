@@ -15,6 +15,7 @@ Usage:
                 [--sonarPrj=<sonarPrj>] \r\n \
                 [--sonarUser=<sonarUser>] \r\n \
                 [--sonarPass=<sonarPass>] \r\n \
+                [--regexTraverseFiles=<regexTraverseFiles>] \r\n \
                 [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
@@ -24,8 +25,9 @@ Options:
   --in=<inputUDB>                               Input UDB file path.
   --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
-  --classQuery=<classQuery>                     Kinds of classes your language has. [default: class, interface ~Unknown ~Unresolved]
+  --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
   --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function,method,procedure,routine,classmethod]
+  --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
@@ -115,18 +117,22 @@ def process_prj_metrics (db, cmdline_arguments):
     return [violation_count, max_metrics_found]
 
 
-def passes_regex_filter (entity, regex_filter, cmdline_arguments):
+def matches_regex (entity, regex_filter, cmdline_arguments):
     if regex_filter is None:
-        return True
+        return False
     try:
-        return re.search(regex_filter, entity.longname()) is None
+        longname = entity.longname()
+        regex_result = re.search(regex_filter, longname)
+        return regex_result is not None
     except:
         verbose = cmdline_arguments["--verbose"]
         if verbose:
             print ("REGEX/EXCEPTION: %s" % regex_filter)
         return False
 
-def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex__str_ignore_item):
+def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex_str_ignore_item):
+    regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
+    regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     max_metrics_json = cmdline_arguments[jsonCmdLineParam]
     max_metrics = {}
     violation_count = 0
@@ -152,10 +158,30 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 #            if verbose:
                 #                print ("LIBRARY/SKIP: %s" % entity.longname())
                 continue
-            if not passes_regex_filter(entity, regex__str_ignore_item, cmdline_arguments):
+            if matches_regex(entity, regex_str_ignore_item, cmdline_arguments):
                 if verbose:
-                    print("REGEX/SKIP: %s" % entity.longname())
+                    print("ENTITY REGEX/SKIP: %s" % entity.longname())
                 continue
+            ent_kind = entity.kindname()
+            if str.find(ent_kind, "Unknown") >= 0:
+                continue
+            container_file = None
+            if str.find(ent_kind, "File") >= 0:
+                container_file = entity
+            else:
+                container_ref = entity.ref("definein")
+                container_file = container_ref.file() if container_ref is not None else None
+            if container_file is None:
+                print("WARNING: no container file: %s" % entity.longname())
+            else:
+                if not matches_regex(container_file, regex_str_traverse_files, cmdline_arguments):
+                    if verbose:
+                        print("SKIP due to file traverse regex non-match: %s" % entity.file().longname())
+                    continue
+                if matches_regex(container_file, regex_ignore_files, cmdline_arguments):
+                    if verbose:
+                        print("SKIP due to file ignore regex match: %s" % entity.file().longname())
+                    continue
             #real work
             if metric == "CountParams":
                 metric_value = len (entity.ents("Define", "Parameter"))
@@ -173,17 +199,18 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             if metric_value > max_value_found: # max found, which could be a violator or not
                 max_value_found = metric_value
                 entity_with_max_value_found = entity
-        print("...........................................")
-        kind = "violator"
-        if max_value_found <= max_allowed_value:
-            kind = "non violator"
-        print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
-        lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or nor
-        print("...........................................")
+        if entity_with_max_value_found is not None:
+            print("...........................................")
+            kind = "violator"
+            if max_value_found <= max_allowed_value:
+                kind = "non violator"
+            print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
+            lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or nor
+            print("...........................................")
     return [violation_count, violators_found]
 
 def process_file_metrics (db, cmdline_arguments):
-    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", "files", _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
+    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", "file", _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
 
 def process_class_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxClassMetrics", cmdline_arguments["--classQuery"], _print_class_violation, cmdline_arguments.get("--regexIgnoreClasses", None))
