@@ -62,9 +62,21 @@ Examples
 Here is an example used to analyze Delphi code:
 
 ```
-srccheck --in="C:\temp\PJ_DIARIO.udb" --maxFileMetrics={"CountLineCode":5000,"CountDeclFunction":40,"CountDeclClass":5} --maxClassMetrics={"CountDeclMethod":50,"MaxInheritanceTree":6}
---maxRoutineMetrics={"CountLineCode":1000,"CountParams":20,"CyclomaticStrict":24,"CyclomaticModified":12} --maxPrjMetrics={"AvgCyclomatic":2,"MaxNesting":5} --regexIgnoreFiles="tlb|[.]dfm" --regexIgnoreRoutines="ExecutaMetodoServidor|Invoke" --verbose
+C:\>srccheck --in="C:\temp\PJ_DIARIO.udb" --maxFileMetrics={\"CountLineCode\":5000,\"CountDeclFunction\":40,\"CountDeclClass\":5} --maxClassMetrics={\"CountDeclMethod\":50,\"MaxInheritanceTree\":6}
+--maxRoutineMetrics={\"CountLineCode\":1000,\"CountParams\":20,\"CyclomaticStrict\":24,\"CyclomaticModified\":12} --maxPrjMetrics={\"AvgCyclomatic\":2,\"MaxNesting\":5} --regexIgnoreFiles="tlb|[.]dfm" --regexIgnoreRoutines="ExecutaMetodoServidor|Invoke" --verbose
 ```
+
+(Note that under the Windows shell you need to escape each " with a \ ).
+
+If the command above fails, you may need to set PATH and PYTHONPATH if you have Understand installed in a non-default location:
+
+```
+C:\>set PYTHONPATH=C:\Program Files\SciTools-4.0.860-64b\bin\pc-win64\python
+
+C:\>set PATH=%PATH%;C:\Program Files\SciTools-4.0.860-64b\bin\pc-win64
+
+```
+
 
 Here is an example that analyzes C++ code, using the defaults we provide:
 
@@ -97,3 +109,6 @@ source env/bin/activate
 pip install -r ../requirements.txt
 PYTHONPATH=./scitools/bin/linux64/python python3 ../srccheck.py --in=junit.udb --maxFileMetrics='{"CountLineCode":500,"CountDeclFunction":30,"CountDeclClass":1}' --maxClassMetrics='{"CountDeclMethod":20,"MaxInheritanceTree":4}' --maxRoutineMetrics='{"CountLineCode":80,"CountParams":7,"CyclomaticModified":7}' --maxPrjMetrics='{"AvgCyclomaticModified":3,"MaxNesting":5}' --verbose
 ```
+
+(Note that under the Linux shell you need to single-quote the json values and there is no need to escape each " with a \ like you do under Windows)
+
