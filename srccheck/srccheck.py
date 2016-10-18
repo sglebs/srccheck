@@ -22,7 +22,7 @@ Usage:
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
-  --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win32/python]
+  --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class, interface ~Unknown ~Unresolved]
   --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function,method,procedure,routine,classmethod]
@@ -246,7 +246,7 @@ def main():
         import understand
     except:
         print ("Can' find the Understand DLL. Use --dllDir=...")
-        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win32/python or equivalent")
+        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
         sys.exit(-1)
     try:
         db = understand.open(arguments["--in"])
