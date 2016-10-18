@@ -176,11 +176,11 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             else:
                 if not matches_regex(container_file, regex_str_traverse_files, cmdline_arguments):
                     if verbose:
-                        print("SKIP due to file traverse regex non-match: %s" % entity.file().longname())
+                        print("SKIP due to file traverse regex non-match: %s" % container_file.longname())
                     continue
                 if matches_regex(container_file, regex_ignore_files, cmdline_arguments):
                     if verbose:
-                        print("SKIP due to file ignore regex match: %s" % entity.file().longname())
+                        print("SKIP due to file ignore regex match: %s" % container_file.longname())
                     continue
             #real work
             if metric == "CountParams":
