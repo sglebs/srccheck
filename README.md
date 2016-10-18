@@ -51,7 +51,7 @@ But basically we take 4 different JSONs as input, which define:
  * --maxPrjMetrics , which defines the maximum allowed value for metrics that apply to the project as a whole.
  * --maxFileMetrics , which defines the maximum allowed value for metrics that apply to individual files.
  * --maxClassMetrics , which defines the maximum allowed value for metrics that apply to individual classes.
- * --maxRoutineMetrics , which defines the maximum allowed value for metrics that apply to individual routines (methos, functions, procedures, etc).
+ * --maxRoutineMetrics , which defines the maximum allowed value for metrics that apply to individual routines (methods, functions, procedures, etc).
  
 These JSONs are each a dictionary, where each key is the name of the metric and the value is the maximum value it can take.
 Anything above is considered a violation. 
