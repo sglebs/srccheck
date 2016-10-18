@@ -71,8 +71,8 @@ from docopt import docopt
 import requests
 
 
-def _print_routine_violation(func, metric_name, metric_value):
-    print("%s\t%s\t%s" % (metric_name, metric_value, func.longname()))
+def _print_routine_violation(routine, metric_name, metric_value):
+    print("%s\t%s\t%s" % (metric_name, metric_value, routine.longname()))
 
 def _print_file_violation(file, metric_name, metric_value):
     print("%s\t%s\t%s " % (metric_name, metric_value, file.longname()))
@@ -142,33 +142,45 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     if len(max_metrics) == 0: # No metrics passed in
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
-    max_metrics_found = {}
-    for entity in entities:
-        library_name = entity.library()
-        if library_name is not "" and skipLibraries:
-        #            if verbose:
-        #                print ("LIBRARY/SKIP: %s" % entity.longname())
-            continue
-        if not passes_regex_filter(entity, regex__str_ignore_item, cmdline_arguments):
-            if verbose:
-                print ("REGEX/SKIP: %s" % entity.longname())
-            continue
-        else:
-            for metric,max_value in max_metrics.items():
-                if metric == "CountParams":
-                    metric_value = len (entity.ents("Define", "Parameter"))
-                else:
-                    metric_dict = entity.metric((metric,))
-                    metric_value = metric_dict.get(metric,0) # the call returns a dict
-                if metric_value is None:
-                    metric_value = 0
-                if metric_value > max_metrics_found.get(metric, -1): # even a zero we want to tag as a max
-                    max_metrics_found[metric] = metric_value
-                max_allowed = max_metrics[metric]
-                if metric_value > max_allowed:
-                    violation_count = violation_count + 1
-                    lambda_to_print(entity, metric, metric_value)
-    return [violation_count, max_metrics_found]
+    violators_found = {}
+    for metric,max_allowed_value in max_metrics.items():
+        max_value_found = -1
+        entity_with_max_value_found = None
+        for entity in entities:
+            library_name = entity.library()
+            if library_name is not "" and skipLibraries:
+                #            if verbose:
+                #                print ("LIBRARY/SKIP: %s" % entity.longname())
+                continue
+            if not passes_regex_filter(entity, regex__str_ignore_item, cmdline_arguments):
+                if verbose:
+                    print("REGEX/SKIP: %s" % entity.longname())
+                continue
+            #real work
+            if metric == "CountParams":
+                metric_value = len (entity.ents("Define", "Parameter"))
+            else:
+                metric_dict = entity.metric((metric,))
+                metric_value = metric_dict.get(metric,0) # the call returns a dict
+            if metric_value is None:
+                metric_value = 0
+            if metric_value > violators_found.get(metric, -1): # even a zero we want to tag as a max
+                violators_found[metric] = metric_value
+            max_allowed = max_metrics[metric]
+            if metric_value > max_allowed: # we found a violation
+                violation_count = violation_count + 1
+                lambda_to_print(entity, metric, metric_value)
+            if metric_value > max_value_found: # max found, which could be a violator or not
+                max_value_found = metric_value
+                entity_with_max_value_found = entity
+        print("...........................................")
+        kind = "violator"
+        if max_value_found <= max_allowed_value:
+            kind = "non violator"
+        print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
+        lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or nor
+        print("...........................................")
+    return [violation_count, violators_found]
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", "files", _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
@@ -253,10 +265,10 @@ def main():
     except understand.UnderstandError as exc:
         print ("Error opening input file: %s" % exc)
         sys.exit(-2)
-    print ("\r\n====== PRJ Metrics (%s) ==========" % db.name())
+    print ("\r\n====== Project Metrics (%s) ==========" % db.name())
     print_prj_metrics(db, arguments)
     print ("")
-    print ("\r\n====== Prj Metrics that failed the filters  ===========")
+    print ("\r\n====== Project Metrics that failed the filters  ===========")
     [total_violation_count , prj_tracked_metrics] = process_prj_metrics(db, arguments)
     print ("")
     print ("\r\n====== File Metrics that failed the filters  ===========")
@@ -284,6 +296,7 @@ def main():
     print ("\r\n--------------------------------------------------")
     print ("Started : %s" % str(start_time))
     print ("Finished: %s" % str(end_time))
+    print ("Total: %s" % str(end_time-start_time))
     print ("Violations: %i" % total_violation_count)
     print ("--------------------------------------------------")
     db.close()
