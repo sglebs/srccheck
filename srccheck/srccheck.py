@@ -26,7 +26,7 @@ Options:
   --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
-  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function,method,procedure,routine,classmethod]
+  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved,method ~Unknown ~Unresolved,procedure ~Unknown ~Unresolved,routine ~Unknown ~Unresolved,classmethod ~Unknown ~Unresolved]
   --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
@@ -163,16 +163,17 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     print("ENTITY REGEX/SKIP: %s" % entity.longname())
                 continue
             ent_kind = entity.kindname()
-            if str.find(ent_kind, "Unknown") >= 0:
+            if str.find(ent_kind, "Unknown") >= 0 or str.find(ent_kind, "Unresolved") >= 0:
                 continue
             container_file = None
             if str.find(ent_kind, "File") >= 0:
                 container_file = entity
             else:
-                container_ref = entity.ref("definein")
+                container_ref = entity.ref("definein, declarein")
                 container_file = container_ref.file() if container_ref is not None else None
             if container_file is None:
-                print("WARNING: no container file: %s" % entity.longname())
+                if verbose:
+                    print("WARNING: no container file: %s. NOT SKIPPING to be safe" % entity.longname())
             else:
                 if not matches_regex(container_file, regex_str_traverse_files, cmdline_arguments):
                     if verbose:
@@ -292,7 +293,8 @@ def main():
     except understand.UnderstandError as exc:
         print ("Error opening input file: %s" % exc)
         sys.exit(-2)
-    print ("\r\n====== Project Metrics (%s) ==========" % db.name())
+
+    print ("\r\n====== Project Metrics (%s) (%s) ==========" % (db.name(), db.language()[0]))
     print_prj_metrics(db, arguments)
     print ("")
     print ("\r\n====== Project Metrics that failed the filters  ===========")
