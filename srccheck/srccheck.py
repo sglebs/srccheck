@@ -176,28 +176,28 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     max_metrics_json = cmdline_arguments[jsonCmdLineParam]
-    max_metrics = {}
+    max_values_allowed_by_metric = {}
     violation_count = 0
     entities = db.ents(entityQuery)
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
     verbose = cmdline_arguments["--verbose"]
     try:
-        max_metrics = json.loads(max_metrics_json)
+        max_values_allowed_by_metric = json.loads(max_metrics_json)
     except:
-        max_metrics = {}
-    if not isinstance(max_metrics, dict):
-        max_metrics = {}
-    if len(max_metrics) == 0: # No metrics passed in
+        max_values_allowed_by_metric = {}
+    if not isinstance(max_values_allowed_by_metric, dict):
+        max_values_allowed_by_metric = {}
+    if len(max_values_allowed_by_metric) == 0: # No metrics passed in
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
-    violators_found = {}
-    for metric, max_allowed_value in max_metrics.items():
+    highest_values_found_by_metric = {}
+    for metric, max_allowed_value in max_values_allowed_by_metric.items():
         max_value_found = -1
         entity_with_max_value_found = None
         for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments):
-            if metric_value > violators_found.get(metric, -1): # even a zero we want to tag as a max
-                violators_found[metric] = metric_value
-            max_allowed = max_metrics[metric]
+            if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
+                highest_values_found_by_metric[metric] = metric_value
+            max_allowed = max_values_allowed_by_metric[metric]
             if metric_value > max_allowed: # we found a violation
                 violation_count = violation_count + 1
                 lambda_to_print(entity, metric, metric_value)
@@ -212,7 +212,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
             lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
             print("...........................................")
-    return [violation_count, violators_found]
+    return [violation_count, highest_values_found_by_metric]
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", "file", _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
