@@ -72,6 +72,20 @@ import re
 from docopt import docopt
 import requests
 
+import statistics
+
+STATS_LAMBDAS = {"AVG": statistics.mean,
+                 "MEDIAN": statistics.median,
+                 "MEDIANHIGH": statistics.median_high,
+                 "MEDIANLOW": statistics.median_low,
+                 "MEDIANGROUPED": statistics.median_grouped,
+                 "MODE": statistics.mode,
+                 "STDEV": statistics.pstdev,
+                 "VARIANCE": statistics.pvariance}
+
+class DummyEntity:
+    def longname(self):
+        return ""
 
 def _print_routine_violation(routine, metric_name, metric_value):
     print("%s\t%s\t%s" % (metric_name, metric_value, routine.longname()))
@@ -192,26 +206,48 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         return [0, {}]
     highest_values_found_by_metric = {}
     for metric, max_allowed_value in max_values_allowed_by_metric.items():
-        max_value_found = -1
-        entity_with_max_value_found = None
-        for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments):
-            if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
-                highest_values_found_by_metric[metric] = metric_value
-            max_allowed = max_values_allowed_by_metric[metric]
-            if metric_value > max_allowed: # we found a violation
+        lambda_stats = None
+        if ":" in metric:
+            lambda_name, adjusted_metric = metric.split(":")
+            lambda_stats = STATS_LAMBDAS.get(lambda_name.upper().strip(), None)
+
+        if lambda_stats is None:  # regular, not stats
+            max_value_found = -1
+            entity_with_max_value_found = None
+            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments):
+                if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
+                    highest_values_found_by_metric[metric] = metric_value
+                max_allowed = max_values_allowed_by_metric[metric]
+                if metric_value > max_allowed: # we found a violation
+                    violation_count = violation_count + 1
+                    lambda_to_print(entity, metric, metric_value)
+                if metric_value > max_value_found: # max found, which could be a violator or not
+                    max_value_found = metric_value
+                    entity_with_max_value_found = entity
+            if entity_with_max_value_found is not None:
+                print("...........................................")
+                kind = "violator"
+                if max_value_found <= max_allowed_value:
+                    kind = "non violator"
+                print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
+                lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
+                print("...........................................")
+        else: # stats, compute on the whole population
+            def metric_values(): # generator of a stream of float values, to be consumed by the stats functions
+                for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, adjusted_metric,
+                                                                                                 verbose, skipLibraries,
+                                                                                                 regex_str_ignore_item,
+                                                                                                 regex_str_traverse_files,
+                                                                                                 regex_ignore_files,
+                                                                                                 cmdline_arguments):
+                    yield metric_value
+
+            stats_value = lambda_stats(metric_values())
+            if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
-                lambda_to_print(entity, metric, metric_value)
-            if metric_value > max_value_found: # max found, which could be a violator or not
-                max_value_found = metric_value
-                entity_with_max_value_found = entity
-        if entity_with_max_value_found is not None:
-            print("...........................................")
-            kind = "violator"
-            if max_value_found <= max_allowed_value:
-                kind = "non violator"
-            print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
-            lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
-            print("...........................................")
+                highest_values_found_by_metric[metric] = stats_value
+                lambda_to_print(DummyEntity(), metric, stats_value)
+
     return [violation_count, highest_values_found_by_metric]
 
 def process_file_metrics (db, cmdline_arguments):

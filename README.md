@@ -112,3 +112,24 @@ PYTHONPATH=./scitools/bin/linux64/python python3 ../srccheck.py --in=junit.udb -
 
 (Note that under the Linux shell you need to single-quote the json values and there is no need to escape each " with a \ like you do under Windows)
 
+Averages and variances
+======================
+Understand does provide some metrics for averages. The problem is that these do not take into account our whitelist or 
+blacklist of files. Also, not all metrics have Stdev, Avg etc equivalents. In order to fix this we added support to
+compute a few derived stats metrics on any existing metric, using prefixes. They are:
+
+   * AVG (uses statistics.mean)
+   * MEDIAN (uses statistics.median)
+   * MEDIANGROUPED (uses statistics.median_grouped)
+   * MEDIANHIGH (uses statistics.median_high)
+   * MEDIANLOW (uses statistics.median_low)
+   * MODE (uses statistics.mode)
+   * STDEV (uses statistics.pstdev)
+   * VARIANCE (uses statistics.pvariance)
+   
+Example:  {CyclomaticModified":10, "STDEV:CyclomaticModified":1.8, "AVG:CyclomaticModified":2.2} 
+
+The example above will raise an issue if the maximum CyclomaticModified goes above 10, but also if 
+the average goes above 2.2 or the standard deviation goes above 1.8. This allows you to control not
+only maximum values of your outliers, but also averages and the spread (how far off they spread).
+We use the stats functions in https://docs.python.org/3/library/statistics.html .
