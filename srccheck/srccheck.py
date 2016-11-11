@@ -205,7 +205,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
     highest_values_found_by_metric = {}
-    for metric, max_allowed_value in max_values_allowed_by_metric.items():
+    for metric in sorted(max_values_allowed_by_metric.keys(), key=lambda x: x.split(":")[-1]):
+        max_allowed_value = max_values_allowed_by_metric[metric]
         lambda_stats = None
         if ":" in metric:
             lambda_name, adjusted_metric = metric.split(":")
