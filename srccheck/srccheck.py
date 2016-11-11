@@ -230,7 +230,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 kind = "violator"
                 if max_value_found <= max_allowed_value:
                     kind = "non violator"
-                print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value))
+                print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value), end="")
                 lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
                 print("...........................................")
         else: # stats, compute on the whole population
@@ -248,6 +248,10 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 violation_count = violation_count + 1
                 highest_values_found_by_metric[metric] = stats_value
                 lambda_to_print(DummyEntity(), metric, stats_value)
+            else:
+                print("...........................................")
+                print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
+                print("...........................................")
 
     return [violation_count, highest_values_found_by_metric]
 
