@@ -13,8 +13,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'srccheck = srccheck.srccheck:main',
-            'srcplot = srccheck.srcplot:main',
+            'srccheck = utilities.srccheck:main',
+            'srcplot = utilities.srcplot:main',
         ],
     }
 )

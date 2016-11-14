@@ -40,7 +40,7 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
             metric_dict = entity.metric((metric,))
             metric_value = metric_dict.get(metric, 0)  # the call returns a dict
         if metric_value is None:
-            metric_value = 0
+            continue
         if metric_value == 0:
             if skip_zeroes:
                 continue

@@ -56,7 +56,7 @@ import sys
 
 import matplotlib.pyplot as plt
 from docopt import docopt
-from srccheck.utils import stream_of_entity_with_metric
+from utilities.utils import stream_of_entity_with_metric
 
 
 def plot_hist_file_metrics (db, cmdline_arguments):
