@@ -75,7 +75,7 @@ import sys
 
 import requests
 from docopt import docopt
-from utils import stream_of_entity_with_metric
+from srccheck.utils import stream_of_entity_with_metric
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,

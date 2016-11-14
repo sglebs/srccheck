@@ -51,11 +51,13 @@ Author:
 """
 
 import datetime
-import sys
-from docopt import docopt
-from utils import stream_of_entity_with_metric
-import matplotlib.pyplot as plt
 import os
+import sys
+
+import matplotlib.pyplot as plt
+from docopt import docopt
+from srccheck.utils import stream_of_entity_with_metric
+
 
 def plot_hist_file_metrics (db, cmdline_arguments):
     plot_hist_generic_metrics(db, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
