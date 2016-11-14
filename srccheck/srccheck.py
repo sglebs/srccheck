@@ -4,6 +4,7 @@ Usage:
   srccheck       --in=<inputUDB> \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
+                [--fileQuery=<fileQuery>]\r\n \
                 [--classQuery=<classQuery>]\r\n \
                 [--routineQuery=<routineQuery>]\r\n \
                 [--maxPrjMetrics=<maxPrjMetrics>]\r\n \
@@ -25,6 +26,7 @@ Options:
   --in=<inputUDB>                               Input UDB file path.
   --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
+  --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
   --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved,method ~Unknown ~Unresolved,procedure ~Unknown ~Unresolved,routine ~Unknown ~Unresolved,classmethod ~Unknown ~Unresolved]
   --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
@@ -40,7 +42,7 @@ Options:
   --sonarPrj=<sonarPrj>                         Name of Project in Sonar [default: #]
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
-  --verbose                                     If you want lots of messages printed. [default: false]
+  -v, --verbose                                     If you want lots of messages printed. [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -64,15 +66,14 @@ Author:
 # Multi-platform: http://cx-freeze.sourceforge.net
 # Publishing in SONAR: http://docs.codehaus.org/pages/viewpage.action?pageId=229743270
 
-import sys
-import json
 import datetime
-import re
-
-from docopt import docopt
-import requests
-
+import json
 import statistics
+import sys
+
+import requests
+from docopt import docopt
+from utils import stream_of_entity_with_metric
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -130,61 +131,6 @@ def process_prj_metrics (db, cmdline_arguments):
                 violation_count = violation_count + 1
     return [violation_count, max_metrics_found]
 
-
-def matches_regex (entity, regex_filter, cmdline_arguments):
-    if regex_filter is None:
-        return False
-    try:
-        longname = entity.longname()
-        regex_result = re.search(regex_filter, longname)
-        return regex_result is not None
-    except:
-        verbose = cmdline_arguments["--verbose"]
-        if verbose:
-            print ("REGEX/EXCEPTION: %s" % regex_filter)
-        return False
-
-def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments ):
-    for entity in entities:
-        library_name = entity.library()
-        if library_name is not "" and skipLibraries:
-            #            if verbose:
-            #                print ("LIBRARY/SKIP: %s" % entity.longname())
-            continue
-        if matches_regex(entity, regex_str_ignore_item, cmdline_arguments):
-            if verbose:
-                print("ENTITY REGEX/SKIP: %s" % entity.longname())
-            continue
-        ent_kind = entity.kindname()
-        if str.find(ent_kind, "Unknown") >= 0 or str.find(ent_kind, "Unresolved") >= 0:
-            continue
-        container_file = None
-        if str.find(ent_kind, "File") >= 0:
-            container_file = entity
-        else:
-            container_ref = entity.ref("definein, declarein")
-            container_file = container_ref.file() if container_ref is not None else None
-        if container_file is None:
-            if verbose:
-                print("WARNING: no container file: %s. NOT SKIPPING to be safe" % entity.longname())
-        else:
-            if not matches_regex(container_file, regex_str_traverse_files, cmdline_arguments):
-                if verbose:
-                    print("SKIP due to file traverse regex non-match: %s" % container_file.longname())
-                continue
-            if matches_regex(container_file, regex_ignore_files, cmdline_arguments):
-                if verbose:
-                    print("SKIP due to file ignore regex match: %s" % container_file.longname())
-                continue
-        # real work
-        if metric == "CountParams":
-            metric_value = len(entity.ents("Define", "Parameter"))
-        else:
-            metric_dict = entity.metric((metric,))
-            metric_value = metric_dict.get(metric, 0)  # the call returns a dict
-        if metric_value is None:
-            metric_value = 0
-        yield [entity, container_file, metric, metric_value]
 
 def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex_str_ignore_item):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
@@ -256,7 +202,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     return [violation_count, highest_values_found_by_metric]
 
 def process_file_metrics (db, cmdline_arguments):
-    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", "file", _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
+    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
 
 def process_class_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxClassMetrics", cmdline_arguments["--classQuery"], _print_class_violation, cmdline_arguments.get("--regexIgnoreClasses", None))

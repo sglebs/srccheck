@@ -9,10 +9,12 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'requests==2.10.0',
+        'matplotlib==1.5.3'
     ],
     entry_points={
         'console_scripts': [
             'srccheck = srccheck.srccheck:main',
+            'srcplot = srccheck.srcplot:main',
         ],
     }
 )
