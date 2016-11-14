@@ -1,7 +1,7 @@
 import re
 
 
-def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments ):
+def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes = False ):
     for entity in entities:
         library_name = entity.library()
         if library_name is not "" and skipLibraries:
@@ -42,6 +42,8 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
         if metric_value is None:
             metric_value = 0
         if metric_value == 0:
+            if skip_zeroes:
+                continue
             if verbose:
                 print("WARNING: metric is zero for %s" % entity )
         yield [entity, container_file, metric, metric_value]

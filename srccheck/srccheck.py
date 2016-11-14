@@ -20,7 +20,8 @@ Usage:
                 [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
-                [--verbose]
+                [--verbose] \r\n \
+                [--skipZeroes]
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
@@ -43,6 +44,7 @@ Options:
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
   -v, --verbose                                     If you want lots of messages printed. [default: false]
+  -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -140,6 +142,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     violation_count = 0
     entities = db.ents(entityQuery)
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
+    skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
     try:
         max_values_allowed_by_metric = json.loads(max_metrics_json)
@@ -161,7 +164,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         if lambda_stats is None:  # regular, not stats
             max_value_found = -1
             entity_with_max_value_found = None
-            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments):
+            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes=skip_zeroes):
                 if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
                     highest_values_found_by_metric[metric] = metric_value
                 max_allowed = max_values_allowed_by_metric[metric]
@@ -186,7 +189,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                                                                                                  regex_str_ignore_item,
                                                                                                  regex_str_traverse_files,
                                                                                                  regex_ignore_files,
-                                                                                                 cmdline_arguments):
+                                                                                                 cmdline_arguments,
+                                                                                                 skip_zeroes=skip_zeroes):
                     yield metric_value
 
             stats_value = lambda_stats(metric_values())

@@ -14,8 +14,9 @@ Usage:
                 [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
-                [--verbose] \
-                [--logarithmic] \
+                [--verbose]  \r\n \
+                [--logarithmic]  \r\n \
+                [--skipZeroes]
 
 
 Options:
@@ -34,6 +35,7 @@ Options:
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
+  -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -69,6 +71,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     entities = db.ents(entityQuery)
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
+    skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
     metrics = [metric.strip() for metric in metrics_as_string.split(",")]
     for metric in sorted(metrics):
@@ -79,11 +82,12 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
                                                                                              regex_str_ignore_item,
                                                                                              regex_str_traverse_files,
                                                                                              regex_ignore_files,
-                                                                                             cmdline_arguments):
+                                                                                             cmdline_arguments,
+                                                                                             skip_zeroes=skip_zeroes):
                 yield metric_value
 
         metric_values_as_list = [value for value in metric_values()]
-        max_value = max(metric_values_as_list)
+        max_value = max(metric_values_as_list) if len(metric_values_as_list)>0 else 0
         #bin_count = max (10, int (20 * math.log(abs(1+max_value),10)))
         plt.figure() # new one, or they will be mixed
         n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
