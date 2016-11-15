@@ -16,6 +16,9 @@ It could be routine cyclomatic complexity, it could be max number of methods in 
 [Understand Metric](https://scitools.com/support/metrics_list/) can be used. And it supports many programming
 languages (Java, C++, Python, etc).
 
+NOTE: There is one extra metric that Understand does not have natively but we do support: CountParams, for routines/functions/methods.
+It represents the number of parameters a routine/function/method takes.
+
 Beyond that, you can keep a trend dashboard of your metrics over time. For that, you need to have Jenkins installed
 and its [Plot Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Plot+Plugin) installed as well. srccheck can
 generate the CSV file that this plugin requires (see our --outputCSV= command-line parameter).
