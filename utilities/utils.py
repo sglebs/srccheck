@@ -46,6 +46,9 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
                 continue
             if verbose:
                 print("WARNING: metric is zero for %s" % entity )
+        if metric_value < 0:
+            if verbose:
+                print("WARNING: metric is negative %s" % entity)
         yield [entity, container_file, metric, metric_value]
 
 
