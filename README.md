@@ -87,7 +87,7 @@ Here is an example that analyzes C++ code, using the defaults we provide:
 srccheck --in=c:\temp\BlackJack.udb --sonarUser=admin --sonarPass=admin --sonarURL=http://localhost:9000/api/manual_measures --sonarPrj=BlackJack 
 ```
 
-Here is a full example which gets srccheck, gets understand, gets the source code for junit,
+Here is a full example which gets the srccheck sources, gets understand, gets the source code for junit,
 invokes understand on its sources and then our tool:
 
 ```
@@ -109,6 +109,7 @@ und add ./junit/src/main/java/junit junit.udb
 und analyze junit.udb
 virtualenv env -p /usr/bin/python3
 source env/bin/activate
+pip install paver
 pip install -r ../requirements.txt
 PYTHONPATH=./scitools/bin/linux64/python python3 ../srccheck.py --in=junit.udb --maxFileMetrics='{"CountLineCode":500,"CountDeclFunction":30,"CountDeclClass":1}' --maxClassMetrics='{"CountDeclMethod":20,"MaxInheritanceTree":4}' --maxRoutineMetrics='{"CountLineCode":80,"CountParams":7,"CyclomaticModified":7}' --maxPrjMetrics='{"AvgCyclomaticModified":3,"MaxNesting":5}' --verbose
 ```
@@ -136,3 +137,15 @@ The example above will raise an issue if the maximum CyclomaticModified goes abo
 the average goes above 2.2 or the standard deviation goes above 1.8. This allows you to control not
 only maximum values of your outliers, but also averages and the spread (how far off they spread).
 We use the stats functions in https://docs.python.org/3/library/statistics.html .
+
+Histograms
+==========
+Sometimes metric values are very high and we want to visualize how the values are spread and their frequencies. With that in mind the *srcplot* tools was implemented and is bundled in - it plots histograms of the values found for the metric(s) you choose. It is similar to *srccheck* to run, with some minor differences. One of them is that you pass a comma-separated list of metric names for File, Class and Routine (and not max values as a json, as with *srccheck* itself). You can also choose to plot the histogram using a logarithmic scale for the y axis (-l flag). In cases you get too many occurrences of zero for the metric value and want to discard those, to focus on values > 0, you can pass a flag for that (-z). The tool will output PNG files in the current directory, one for each metric.
+
+Here's how to plot histograms for some metrics for the Django project:
+
+```
+srcplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --fileMetrics=CountLineCode,CountDeclFunction,CountDeclClass --classMetrics=CountDeclMethod,MaxInheritanceTree --routineMetrics=CountLineCode,CountParams,CyclomaticStrict -l
+```
+
+
