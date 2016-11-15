@@ -148,4 +148,6 @@ Here's how to plot histograms for some metrics for the Django project:
 srcplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --fileMetrics=CountLineCode,CountDeclFunction,CountDeclClass --classMetrics=CountDeclMethod,MaxInheritanceTree --routineMetrics=CountLineCode,CountParams,CyclomaticStrict -l
 ```
 
+One of the files that the line above will output will look like this:
 
+![CyclomaticStrict for Django functions](example-django.png)
