@@ -223,10 +223,14 @@ def load_metrics_thresholds(max_metrics_json_or_path):
     else:
         return json.loads(max_metrics_json_or_path)
 
-def write_metrics_thresholds(json_path, current_max_metrics):
+def write_metrics_thresholds(json_path, new_max_metrics):
     if os.path.isfile(json_path):
+        original_thresholds = load_metrics_thresholds(json_path)
+        for key, value in new_max_metrics.items():
+            if value < original_thresholds[key]:
+                original_thresholds[key] = value
         with open(json_path, "w") as json_file:
-            json.dump(current_max_metrics, json_file)
+            json.dump(original_thresholds, json_file) # at this point, original_thresholds has been adapted
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
