@@ -116,7 +116,8 @@ def process_prj_metrics (db, cmdline_arguments):
     verbose = cmdline_arguments["--verbose"]
     try:
         max_metrics = load_metrics_thresholds(max_metrics_json)
-    except:
+    except Exception as ex:
+        print("SEVERE WARNING loading json: %s" % ex)
         max_metrics = {}
     if not isinstance(max_metrics, dict):
         max_metrics = {}
@@ -147,7 +148,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     verbose = cmdline_arguments["--verbose"]
     try:
         max_values_allowed_by_metric = load_metrics_thresholds(max_metrics_json)
-    except:
+    except Exception as ex:
+        print("SEVERE WARNING loading json: %s" % ex)
         max_values_allowed_by_metric = {}
     if not isinstance(max_values_allowed_by_metric, dict):
         max_values_allowed_by_metric = {}
@@ -194,7 +196,12 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                                                                                                  skip_zeroes=skip_zeroes):
                     yield metric_value
 
-            stats_value = lambda_stats(metric_values())
+            try:
+                stats_value = lambda_stats(metric_values())
+            except statistics.StatisticsError as se:
+                print ("ERROR: %s" % se)
+                continue
+
             if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
                 highest_values_found_by_metric[metric] = stats_value
