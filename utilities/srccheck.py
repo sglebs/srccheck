@@ -76,6 +76,7 @@ import sys
 import requests
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric
+import os.path
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -114,7 +115,7 @@ def process_prj_metrics (db, cmdline_arguments):
     violation_count = 0
     verbose = cmdline_arguments["--verbose"]
     try:
-        max_metrics = json.loads(max_metrics_json)
+        max_metrics = load_metrics_thresholds(max_metrics_json)
     except:
         max_metrics = {}
     if not isinstance(max_metrics, dict):
@@ -145,7 +146,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
     try:
-        max_values_allowed_by_metric = json.loads(max_metrics_json)
+        max_values_allowed_by_metric = load_metrics_thresholds(max_metrics_json)
     except:
         max_values_allowed_by_metric = {}
     if not isinstance(max_values_allowed_by_metric, dict):
@@ -204,6 +205,15 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print("...........................................")
 
     return [violation_count, highest_values_found_by_metric]
+
+
+def load_metrics_thresholds(max_metrics_json_or_path):
+    if os.path.isfile(max_metrics_json_or_path):
+        with open(max_metrics_json_or_path) as max_metrics_json:
+            return json.load(max_metrics_json)
+    else:
+        return json.loads(max_metrics_json_or_path)
+
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))

@@ -59,6 +59,8 @@ But basically we take 4 different JSONs as input, which define:
 These JSONs are each a dictionary, where each key is the name of the metric and the value is the maximum value it can take.
 Anything above is considered a violation. 
 
+NOTE: instead passing literal json values you can also pass file paths to json files.
+
 Examples
 =========
 
