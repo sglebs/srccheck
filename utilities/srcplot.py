@@ -57,7 +57,7 @@ import sys
 import matplotlib.pyplot as plt
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric
-
+import statistics
 
 def plot_hist_file_metrics (db, cmdline_arguments):
     plot_hist_generic_metrics(db, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
@@ -97,6 +97,11 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         plt.ylabel('Value')
         plt.title("%s %s (total of %i in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
         plt.grid(True)
+        try:
+            plt.axvline(statistics.mean(metric_values_as_list), color='b', linestyle='dashed', linewidth=2)
+            plt.axvline(statistics.median(metric_values_as_list), color='r', linestyle='dashed', linewidth=2)
+        except statistics.StatisticsError as se:
+            pass
         if bool(cmdline_arguments["--logarithmic"]):
             plt.yscale('symlog', basey=10, linthreshy=10, subsy=[2, 3, 4, 5, 6, 7, 8, 9]) # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
         filename = "%s-%s-%s.png" % (os.path.split(db.name())[-1], scope_name,metric)
