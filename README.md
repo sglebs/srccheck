@@ -64,11 +64,7 @@ Now your *dist* directory should have a standalone native executable which you c
 
 How to Run It
 =============
-The source code includes a file comment that defines all command-line parameters and what they do. In order to avoid
-duplication here, we recommend that you look at the top of the srccheck.py file. Or simply run the tool and have it
-print the options.
-
-But basically we take 4 different JSONs as input, which define:
+Execute *srccheck --help* to see what the options are. Basically we take 4 different JSONs as input, which define:
 
  * --maxPrjMetrics , which defines the maximum allowed value for metrics that apply to the project as a whole.
  * --maxFileMetrics , which defines the maximum allowed value for metrics that apply to individual files.
@@ -90,9 +86,9 @@ C:\>srccheck --in="C:\temp\PJ_DIARIO.udb" --maxFileMetrics={\"CountLineCode\":50
 --maxRoutineMetrics={\"CountLineCode\":1000,\"CountParams\":20,\"CyclomaticStrict\":24,\"CyclomaticModified\":12} --maxPrjMetrics={\"AvgCyclomatic\":2,\"MaxNesting\":5} --regexIgnoreFiles="tlb|[.]dfm" --regexIgnoreRoutines="ExecutaMetodoServidor|Invoke" --verbose
 ```
 
-(Note that under the Windows shell you need to escape each " with a \ ).
+(Note that under the Windows shell you need to escape each " with a \ , as we show above).
 
-If the command above fails, you may need to set PATH and PYTHONPATH if you have Understand installed in a non-default location:
+If the command above fails, you may need to pass an appropriate --dllDir value. Or set PATH and PYTHONPATH:
 
 ```
 C:\>set PYTHONPATH=C:\Program Files\SciTools-4.0.860-64b\bin\pc-win64\python
@@ -108,7 +104,7 @@ Here is an example that analyzes C++ code, using the defaults we provide:
 srccheck --in=c:\temp\BlackJack.udb --sonarUser=admin --sonarPass=admin --sonarURL=http://localhost:9000/api/manual_measures --sonarPrj=BlackJack 
 ```
 
-Here is a full example which gets the srccheck sources, gets understand, gets the source code for junit,
+Here is a full example which installs srccheck in your global Python interpreter, gets SciTools Understand, gets the source code for junit,
 invokes understand on its sources and then our tool:
 
 ```
@@ -155,7 +151,14 @@ We use the stats functions in https://docs.python.org/3/library/statistics.html 
 
 Histograms
 ==========
-Sometimes metric values are very high and we want to visualize how the values are spread and their frequencies. With that in mind the *srcplot* tools was implemented and is bundled in - it plots histograms of the values found for the metric(s) you choose. It is similar to *srccheck* to run, with some minor differences. One of them is that you pass a comma-separated list of metric names for File, Class and Routine (and not max values as a json, as with *srccheck* itself). You can also choose to plot the histogram using a logarithmic scale for the y axis (-l flag). In cases you get too many occurrences of zero for the metric value and want to discard those, to focus on values > 0, you can pass a flag for that (-z). The tool will output PNG files in the current directory, one for each metric.
+Sometimes metric values are very high and we want to visualize how the values are spread and their frequencies. 
+With that in mind the *srcplot* tools was implemented and is bundled in - it plots histograms of the values found 
+for the metric(s) you choose. It is similar to *srccheck* to run, with some minor differences. One of them is that 
+you pass a comma-separated list of metric names for File, Class and Routine (and not max values as a json, as 
+with *srccheck* itself). You can also choose to plot the histogram using a logarithmic scale for the y axis 
+(-l flag). In cases you get too many occurrences of zero for the metric value and want to discard those, 
+to focus on values > 0, you can pass a flag for that (-z). The tool will output PNG files in the current 
+directory, one for each metric.
 
 Here's how to plot histograms for some metrics for the Django project:
 
