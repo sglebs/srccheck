@@ -42,6 +42,12 @@ Make sure your Python has paver installed (pip3 install paver) and then run:
 pip3 install git+https://github.com/sglebs/srccheck
 ```
 
+How to Upgrade It
+=================
+
+```
+pip3 install --upgrade git+https://github.com/sglebs/srccheck
+```
 
 How to Run It
 =============
