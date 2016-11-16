@@ -91,13 +91,11 @@ Here is a full example which gets the srccheck sources, gets understand, gets th
 invokes understand on its sources and then our tool:
 
 ```
-git clone https://github.com/sglebs/srccheck.git
-cd srccheck
-rm -rf tmp
-mkdir tmp
-cd tmp
-wget http://latest.scitools.com/Understand/Understand-4.0.843-Linux-64bit.tgz
-tar xvf Understand-4.0.843-Linux-64bit.tgz
+sudo pip3 install --upgrade pip
+sudo pip3 install paver
+sudo pip3 install git+https://github.com/sglebs/srccheck
+wget http://builds.scitools.com/all_builds/b864/Understand/Understand-4.0.864-Linux-64bit.tgz
+tar xvf Understand-4.0.864-Linux-64bit.tgz
 # make sure und is in the PATH
 export PATH=$PATH:./scitools/bin/linux64/
 git clone https://github.com/junit-team/junit.git
@@ -107,11 +105,7 @@ understand
 und create -languages java junit.udb
 und add ./junit/src/main/java/junit junit.udb
 und analyze junit.udb
-virtualenv env -p /usr/bin/python3
-source env/bin/activate
-pip install paver
-pip install -r ../requirements.txt
-PYTHONPATH=./scitools/bin/linux64/python python3 ../srccheck.py --in=junit.udb --maxFileMetrics='{"CountLineCode":500,"CountDeclFunction":30,"CountDeclClass":1}' --maxClassMetrics='{"CountDeclMethod":20,"MaxInheritanceTree":4}' --maxRoutineMetrics='{"CountLineCode":80,"CountParams":7,"CyclomaticModified":7}' --maxPrjMetrics='{"AvgCyclomaticModified":3,"MaxNesting":5}' --verbose
+srccheck --dllDir=./scitools/bin/linux64/Python --in=junit.udb --maxFileMetrics='{"CountLineCode":500,"CountDeclFunction":30,"CountDeclClass":1}' --maxClassMetrics='{"CountDeclMethod":20,"MaxInheritanceTree":4}' --maxRoutineMetrics='{"CountLineCode":80,"CountParams":7,"CyclomaticModified":7}' --maxPrjMetrics='{"AvgCyclomaticModified":3,"MaxNesting":5}' --verbose
 ```
 
 (Note that under the Linux shell you need to single-quote the json values and there is no need to escape each " with a \ like you do under Windows)
