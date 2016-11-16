@@ -21,7 +21,8 @@ Usage:
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--verbose] \r\n \
-                [--skipZeroes]
+                [--skipZeroes] \r\n \
+                [--adaptive]
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
@@ -43,8 +44,9 @@ Options:
   --sonarPrj=<sonarPrj>                         Name of Project in Sonar [default: #]
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
-  -v, --verbose                                     If you want lots of messages printed. [default: false]
+  -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
+  -a, --adaptive                                If you want srccheck to be adaptive and update the input json files with current max values
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -221,6 +223,10 @@ def load_metrics_thresholds(max_metrics_json_or_path):
     else:
         return json.loads(max_metrics_json_or_path)
 
+def write_metrics_thresholds(json_path, current_max_metrics):
+    if os.path.isfile(json_path):
+        with open(json_path, "w") as json_file:
+            json.dump(current_max_metrics, json_file)
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
@@ -306,23 +312,32 @@ def main():
         print ("Error opening input file: %s" % exc)
         sys.exit(-2)
 
+    adaptive = arguments.get("--adaptive", False)
     print ("\r\n====== Project Metrics (%s) (%s) ==========" % (db.name(), db.language()[0]))
     print_prj_metrics(db, arguments)
     print ("")
     print ("\r\n====== Project Metrics that failed the filters  ===========")
     [total_violation_count , prj_tracked_metrics] = process_prj_metrics(db, arguments)
+    if adaptive:
+        write_metrics_thresholds(arguments.get("--maxPrjMetrics", False), prj_tracked_metrics)
     print ("")
     print ("\r\n====== File Metrics that failed the filters  ===========")
     [violation_count, file_tracked_metrics] = process_file_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
+    if adaptive:
+        write_metrics_thresholds(arguments.get("--maxFileMetrics"), file_tracked_metrics)
     print ("")
     print ("\r\n====== Class Metrics that failed the filters  ==========")
     [violation_count, class_tracked_metrics] = process_class_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
+    if adaptive:
+        write_metrics_thresholds(arguments.get("--maxClassMetrics"), class_tracked_metrics)
     print ("")
     print ("\r\n====== Routine Metrics that failed the filters ==========")
     [violation_count, routine_tracked_metrics] = process_routine_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
+    if adaptive:
+        write_metrics_thresholds(arguments.get("--maxRoutineMetrics"), routine_tracked_metrics)
     print ("")
     print ("\r\n====== Publishing selected metrics  ===========")
     tracked_metrics = {}
