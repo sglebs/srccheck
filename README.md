@@ -49,6 +49,19 @@ How to Upgrade It
 pip3 install --upgrade git+https://github.com/sglebs/srccheck
 ```
 
+How to Install It Standalone On a Machine Without Python
+========================================================
+
+You can generate a self-contained executable that does not need a python interpreter on the target machine:
+
+```
+pip3 install pyinstaller
+pyinstaller --exclude-module understand -F utilities/srccheck.py 
+```
+
+Now your *dist* directory should have a standalone native executable which you can copy to a different machine.
+
+
 How to Run It
 =============
 The source code includes a file comment that defines all command-line parameters and what they do. In order to avoid
