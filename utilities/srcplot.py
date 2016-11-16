@@ -16,7 +16,8 @@ Usage:
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--verbose]  \r\n \
                 [--logarithmic]  \r\n \
-                [--skipZeroes]
+                [--skipZeroes]  \r\n \
+                [--showMeanMedian]
 
 
 Options:
@@ -36,6 +37,7 @@ Options:
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
+  -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -97,11 +99,12 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         plt.ylabel('Value')
         plt.title("%s %s (total of %i in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
         plt.grid(True)
-        try:
-            plt.axvline(statistics.mean(metric_values_as_list), color='b', linestyle='dashed', linewidth=2)
-            plt.axvline(statistics.median(metric_values_as_list), color='r', linestyle='dashed', linewidth=2)
-        except statistics.StatisticsError as se:
-            pass
+        if bool(cmdline_arguments["--showMeanMedian"]):
+            try:
+                plt.axvline(statistics.mean(metric_values_as_list), color='b', linestyle='dashed', linewidth=2)
+                plt.axvline(statistics.median(metric_values_as_list), color='r', linestyle='dashed', linewidth=2)
+            except statistics.StatisticsError as se:
+                pass
         if bool(cmdline_arguments["--logarithmic"]):
             plt.yscale('symlog', basey=10, linthreshy=10, subsy=[2, 3, 4, 5, 6, 7, 8, 9]) # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
         filename = "%s-%s-%s.png" % (os.path.split(db.name())[-1], scope_name,metric)
