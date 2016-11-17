@@ -97,7 +97,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
         plt.xlabel(metric)
         plt.ylabel('Value')
-        plt.title("%s %s (total of %i in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
+        plt.title("%s %s (%i values in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
         plt.grid(True)
         if bool(cmdline_arguments["--showMeanMedian"]):
             try:
@@ -106,7 +106,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
                 median = statistics.median(metric_values_as_list)
                 plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
                 pstdev = statistics.pstdev(metric_values_as_list)
-                plt.xlabel("%s   (avg=%6.2f, median=%6.2f, stdev=%6.2f, max=%6.2f)" % (metric, mean, median, pstdev, max_value))
+                plt.xlabel("%s   (avg=%3.2f, median=%3.2f, stdev=%3.2f, max=%3.2f)" % (metric, mean, median, pstdev, max_value))
             except statistics.StatisticsError as se:
                 pass
         if bool(cmdline_arguments["--logarithmic"]):
