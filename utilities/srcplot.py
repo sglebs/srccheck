@@ -101,8 +101,12 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         plt.grid(True)
         if bool(cmdline_arguments["--showMeanMedian"]):
             try:
-                plt.axvline(statistics.mean(metric_values_as_list), color='b', linestyle='dashed', linewidth=2)
-                plt.axvline(statistics.median(metric_values_as_list), color='r', linestyle='dashed', linewidth=2)
+                mean = statistics.mean(metric_values_as_list)
+                plt.axvline(mean, color='b', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="round")
+                median = statistics.median(metric_values_as_list)
+                plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
+                pstdev = statistics.pstdev(metric_values_as_list)
+                plt.xlabel("%s   (avg=%6.2f, median=%6.2f, stdev=%6.2f, max=%6.2f)" % (metric, mean, median, pstdev, max_value))
             except statistics.StatisticsError as se:
                 pass
         if bool(cmdline_arguments["--logarithmic"]):
