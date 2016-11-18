@@ -1,4 +1,8 @@
+import os
 import re
+import statistics
+
+from matplotlib import pyplot as plt
 
 
 def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes = False ):
@@ -64,3 +68,29 @@ def matches_regex (entity, regex_filter, cmdline_arguments):
         if verbose:
             print ("REGEX/EXCEPTION: %s" % regex_filter)
         return False
+
+
+def save_histogram(show_mean_median, use_logarithmic_scale, db, max_value, metric, metric_values_as_list, scope_name):
+    plt.figure()  # new one, or they will be mixed
+    n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
+    plt.xlabel(metric)
+    plt.ylabel('Value')
+    plt.title("%s %s (%i values in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
+    plt.grid(True)
+    if show_mean_median:
+        try:
+            mean = statistics.mean(metric_values_as_list)
+            plt.axvline(mean, color='b', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="round")
+            median = statistics.median(metric_values_as_list)
+            plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
+            pstdev = statistics.pstdev(metric_values_as_list)
+            plt.xlabel(
+                "%s   (avg=%3.2f, median=%3.2f, stdev=%3.2f, max=%3.2f)" % (metric, mean, median, pstdev, max_value))
+        except statistics.StatisticsError as se:
+            pass
+    if use_logarithmic_scale:
+        plt.yscale('symlog', basey=10, linthreshy=10, subsy=[2, 3, 4, 5, 6, 7, 8,
+                                                             9])  # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
+    filename = "%s-%s-%s.png" % (os.path.split(db.name())[-1], scope_name, metric)
+    plt.savefig(filename, dpi=72)
+    return filename

@@ -53,13 +53,11 @@ Author:
 """
 
 import datetime
-import os
 import sys
 
-import matplotlib.pyplot as plt
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric
-import statistics
+from utilities.utils import stream_of_entity_with_metric, save_histogram
+
 
 def plot_hist_file_metrics (db, cmdline_arguments):
     plot_hist_generic_metrics(db, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
@@ -94,38 +92,13 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         max_value = max(metric_values_as_list) if len(metric_values_as_list)>0 else 0
         #bin_count = max (10, int (20 * math.log(abs(1+max_value),10)))
         file_name = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
-                       bool(cmdline_arguments["--logarithmic"]),
-                       db,
-                       max_value,
-                       metric,
-                       metric_values_as_list,
-                       scope_name)
+                                   bool(cmdline_arguments["--logarithmic"]),
+                                   db,
+                                   max_value,
+                                   metric,
+                                   metric_values_as_list,
+                                   scope_name)
         print("Saved %s" % file_name)
-
-def save_histogram(show_mean_median, use_logarithmic_scale, db, max_value, metric, metric_values_as_list, scope_name):
-    plt.figure()  # new one, or they will be mixed
-    n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
-    plt.xlabel(metric)
-    plt.ylabel('Value')
-    plt.title("%s %s (%i values in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
-    plt.grid(True)
-    if show_mean_median:
-        try:
-            mean = statistics.mean(metric_values_as_list)
-            plt.axvline(mean, color='b', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="round")
-            median = statistics.median(metric_values_as_list)
-            plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
-            pstdev = statistics.pstdev(metric_values_as_list)
-            plt.xlabel(
-                "%s   (avg=%3.2f, median=%3.2f, stdev=%3.2f, max=%3.2f)" % (metric, mean, median, pstdev, max_value))
-        except statistics.StatisticsError as se:
-            pass
-    if use_logarithmic_scale:
-        plt.yscale('symlog', basey=10, linthreshy=10, subsy=[2, 3, 4, 5, 6, 7, 8,
-                                                             9])  # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
-    filename = "%s-%s-%s.png" % (os.path.split(db.name())[-1], scope_name, metric)
-    plt.savefig(filename, dpi=72)
-    return filename
 
 
 def main():
