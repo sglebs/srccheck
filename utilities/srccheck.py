@@ -176,6 +176,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     last_processed_metric = "" # fix for #21, to reuse values
     last_all_values = [] # fix for #21, to reuse values
     last_max_value_found = -1
+    stats_cache = {}  # fix for #22 - use cached value for stats
     for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
@@ -232,7 +233,9 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     last_processed_metric = adjusted_metric  # fix for 21. in case only stats functions are used, not the pure one.
                     last_all_values = all_values # fix for #21, same as above
                     last_max_value_found = max_value_found # fix for #21, same as above
-                stats_value = lambda_stats(all_values)
+                stats_value = stats_cache.get(adjusted_metric, {}).get(lambda_name, None) # fix for #22 - used cached value for stats
+                if stats_value is None:
+                    stats_value = lambda_stats(all_values)
             except statistics.StatisticsError as se:
                 print ("ERROR: %s" % se)
                 continue
@@ -246,13 +249,15 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
                 print("...........................................")
         if save_histograms and len(all_values) > 0 and lambda_stats is None:
-            file_name = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
+            file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                        bool(cmdline_arguments["--logarithmic"]),
                                        os.path.split(db.name())[-1],
                                        max_value_found,
                                        metric,
                                        all_values,
                                        scope_name)
+            if mean is not None:
+                stats_cache[metric] = {"AVG": mean, "MEDIAN": median, "STDEV": pstdev} # fix for #22 - used cached value for stats
             if verbose:
                 print("Saved %s" % file_name)
 
@@ -273,7 +278,7 @@ def write_metrics_thresholds(json_path, new_max_metrics):
             if value < original_thresholds[key]:
                 original_thresholds[key] = value
         with open(json_path, "w") as json_file:
-            json.dump(original_thresholds, json_file) # at this point, original_thresholds has been adapted
+            json.dump(original_thresholds, json_file, sort_keys=True) # at this point, original_thresholds has been adapted
 
 def process_file_metrics (db, cmdline_arguments):
     return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None), "File")

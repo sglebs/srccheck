@@ -91,7 +91,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         metric_values_as_list = [value for value in metric_values()]
         max_value = max(metric_values_as_list) if len(metric_values_as_list)>0 else 0
         #bin_count = max (10, int (20 * math.log(abs(1+max_value),10)))
-        file_name = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
+        file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                    bool(cmdline_arguments["--logarithmic"]),
                                    os.path.split(db.name())[-1],
                                    max_value,

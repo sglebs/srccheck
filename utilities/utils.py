@@ -70,7 +70,7 @@ def matches_regex (entity, regex_filter, cmdline_arguments):
         return False
 
 
-def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max_value, metric, metric_values_as_list, scope_name):
+def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max_value, metric, metric_values_as_list, scope_name, mean = None, median = None, pstdev = None):
     plt.figure()  # new one, or they will be mixed
     n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
     plt.xlabel("%s   (max=%3.2f)" % (metric, max_value))
@@ -79,11 +79,11 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
     plt.grid(True)
     if show_mean_median:
         try:
-            mean = statistics.mean(metric_values_as_list)
+            mean = statistics.mean(metric_values_as_list) if mean is None else mean
             plt.axvline(mean, color='b', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="round")
-            median = statistics.median(metric_values_as_list)
+            median = statistics.median(metric_values_as_list) if median is None else median
             plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
-            pstdev = statistics.pstdev(metric_values_as_list)
+            pstdev = statistics.pstdev(metric_values_as_list, mean) if pstdev is None else pstdev
             plt.xlabel(
                 "%s   (avg=%3.2f, median=%3.2f, stdev=%3.2f, max=%3.2f)" % (metric, mean, median, pstdev, max_value))
         except statistics.StatisticsError as se:
@@ -93,4 +93,4 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
                                                              9])  # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
     filename = "%s-%s-%s.png" % (filename_prefix, scope_name, metric)
     plt.savefig(filename, dpi=72)
-    return filename
+    return [filename, mean, median, pstdev]
