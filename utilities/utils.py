@@ -73,7 +73,7 @@ def matches_regex (entity, regex_filter, cmdline_arguments):
 def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max_value, metric, metric_values_as_list, scope_name):
     plt.figure()  # new one, or they will be mixed
     n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
-    plt.xlabel(metric)
+    plt.xlabel("%s   (max=%3.2f)" % (metric, max_value))
     plt.ylabel('Value')
     plt.title("%s %s (%i values in %i bins)" % (scope_name, metric, len(metric_values_as_list), len(bins)))
     plt.grid(True)
