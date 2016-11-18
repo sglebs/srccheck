@@ -137,6 +137,12 @@ def process_prj_metrics (db, cmdline_arguments):
                 violation_count = violation_count + 1
     return [violation_count, max_metrics_found]
 
+def metric_name_for_sorting(metric_name):
+    if ":" not in metric_name:
+        return metric_name
+    else:
+        parts = metric_name.split(":")
+        return parts[-1] + parts[0]
 
 def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex_str_ignore_item):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
@@ -159,7 +165,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
     highest_values_found_by_metric = {}
-    for metric in sorted(max_values_allowed_by_metric.keys(), key=lambda x: x.split(":")[-1]):
+    for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
         max_allowed_value = max_values_allowed_by_metric[metric]
         lambda_stats = None
         if ":" in metric:
@@ -204,9 +210,9 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print ("ERROR: %s" % se)
                 continue
 
+            highest_values_found_by_metric[metric] = stats_value
             if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
-                highest_values_found_by_metric[metric] = stats_value
                 lambda_to_print(DummyEntity(), metric, stats_value)
             else:
                 print("...........................................")
