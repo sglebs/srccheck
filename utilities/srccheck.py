@@ -22,7 +22,11 @@ Usage:
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--verbose] \r\n \
                 [--skipZeroes] \r\n \
-                [--adaptive]
+                [--adaptive] \r\n \
+                [--logarithmic]  \r\n \
+                [--showMeanMedian]  \r\n \
+                [--histograms]
+
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
@@ -47,6 +51,9 @@ Options:
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
   -a, --adaptive                                If you want srccheck to be adaptive and update the input json files with current max values
+  -H, --histograms                              If you want srccheck to save histograms, just like srcplot does
+  -l, --logarithmic                             If you want logarithmic y scale. [default: false]
+  -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -77,7 +84,7 @@ import sys
 
 import requests
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric
+from utilities.utils import stream_of_entity_with_metric, save_histogram
 import os.path
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
@@ -144,7 +151,7 @@ def metric_name_for_sorting(metric_name):
         parts = metric_name.split(":")
         return parts[-1] + parts[0]
 
-def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex_str_ignore_item):
+def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuery, lambda_to_print, regex_str_ignore_item, scope_name):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     max_metrics_json = cmdline_arguments[jsonCmdLineParam]
@@ -154,6 +161,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
     skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
+    save_histograms = cmdline_arguments["--histograms"]
     try:
         max_values_allowed_by_metric = load_metrics_thresholds(max_metrics_json)
     except Exception as ex:
@@ -167,6 +175,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     highest_values_found_by_metric = {}
     for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
         max_allowed_value = max_values_allowed_by_metric[metric]
+        all_values = [] # we may need to collect all values, if we are going to save a histogram
         lambda_stats = None
         if ":" in metric:
             lambda_name, adjusted_metric = metric.split(":")
@@ -176,6 +185,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             max_value_found = -1
             entity_with_max_value_found = None
             for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes=skip_zeroes):
+                if save_histograms:
+                    all_values.append(metric_value)
                 if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
                     highest_values_found_by_metric[metric] = metric_value
                 max_allowed = max_values_allowed_by_metric[metric]
@@ -205,11 +216,14 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     yield metric_value
 
             try:
-                stats_value = lambda_stats(metric_values())
+                all_values = [value for value in metric_values()]
+                stats_value = lambda_stats(all_values)
             except statistics.StatisticsError as se:
                 print ("ERROR: %s" % se)
                 continue
 
+            if save_histograms:
+                max_value_found = max(all_values) if len(all_values) > 0 else 0
             highest_values_found_by_metric[metric] = stats_value
             if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
@@ -218,6 +232,16 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print("...........................................")
                 print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
                 print("...........................................")
+        if save_histograms and len(all_values) > 0 and lambda_stats is None:
+            file_name = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
+                                       bool(cmdline_arguments["--logarithmic"]),
+                                       os.path.split(db.name())[-1],
+                                       max_value_found,
+                                       metric,
+                                       all_values,
+                                       scope_name)
+            if verbose:
+                print("Saved %s" % file_name)
 
     return [violation_count, highest_values_found_by_metric]
 
@@ -239,13 +263,13 @@ def write_metrics_thresholds(json_path, new_max_metrics):
             json.dump(original_thresholds, json_file) # at this point, original_thresholds has been adapted
 
 def process_file_metrics (db, cmdline_arguments):
-    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None))
+    return process_generic_metrics(db,cmdline_arguments,"--maxFileMetrics", cmdline_arguments["--fileQuery"], _print_file_violation, cmdline_arguments.get("--regexIgnoreFiles", None), "File")
 
 def process_class_metrics (db, cmdline_arguments):
-    return process_generic_metrics(db,cmdline_arguments,"--maxClassMetrics", cmdline_arguments["--classQuery"], _print_class_violation, cmdline_arguments.get("--regexIgnoreClasses", None))
+    return process_generic_metrics(db,cmdline_arguments,"--maxClassMetrics", cmdline_arguments["--classQuery"], _print_class_violation, cmdline_arguments.get("--regexIgnoreClasses", None), "Class")
 
 def process_routine_metrics (db, cmdline_arguments):
-    return process_generic_metrics(db,cmdline_arguments,"--maxRoutineMetrics", cmdline_arguments["--routineQuery"], _print_routine_violation, cmdline_arguments.get("--regexIgnoreRoutines", None))
+    return process_generic_metrics(db,cmdline_arguments,"--maxRoutineMetrics", cmdline_arguments["--routineQuery"], _print_routine_violation, cmdline_arguments.get("--regexIgnoreRoutines", None), "Routine")
 
 def append_dict_with_key_prefix (dict_to_grow, dict_to_append, prefix):
     for k,v in dict_to_append.items():
