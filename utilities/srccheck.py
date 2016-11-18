@@ -175,6 +175,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     highest_values_found_by_metric = {}
     last_processed_metric = "" # fix for #21, to reuse values
     last_all_values = [] # fix for #21, to reuse values
+    last_max_value_found = -1
     for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
@@ -208,6 +209,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print("...........................................")
             last_processed_metric = metric  # fix for #21, to reuse values
             last_all_values = all_values  # fix for #21, to reuse values
+            last_max_value_found = max_value_found
         else: # stats, compute on the whole population
             def metric_values(): # generator of a stream of float values, to be consumed by the stats functions
                 for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, adjusted_metric,
@@ -222,17 +224,19 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             try:
                 if adjusted_metric == last_processed_metric: # fix for #21 - reuses values, thanks to sorting we know teh pure metric must have come just before
                     all_values = last_all_values
+                    max_value_found = last_max_value_found
                 else:
                     all_values = [value for value in metric_values()]
+                    if save_histograms:
+                        max_value_found = max(all_values) if len(all_values) > 0 else 0
                     last_processed_metric = adjusted_metric  # fix for 21. in case only stats functions are used, not the pure one.
                     last_all_values = all_values # fix for #21, same as above
+                    last_max_value_found = max_value_found # fix for #21, same as above
                 stats_value = lambda_stats(all_values)
             except statistics.StatisticsError as se:
                 print ("ERROR: %s" % se)
                 continue
 
-            if save_histograms:
-                max_value_found = max(all_values) if len(all_values) > 0 else 0
             highest_values_found_by_metric[metric] = stats_value
             if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
