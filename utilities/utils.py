@@ -70,7 +70,7 @@ def matches_regex (entity, regex_filter, cmdline_arguments):
         return False
 
 
-def save_histogram(show_mean_median, use_logarithmic_scale, db, max_value, metric, metric_values_as_list, scope_name):
+def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max_value, metric, metric_values_as_list, scope_name):
     plt.figure()  # new one, or they will be mixed
     n, bins, patches = plt.hist(metric_values_as_list, "doane", facecolor='green', alpha=0.75)
     plt.xlabel(metric)
@@ -91,6 +91,6 @@ def save_histogram(show_mean_median, use_logarithmic_scale, db, max_value, metri
     if use_logarithmic_scale:
         plt.yscale('symlog', basey=10, linthreshy=10, subsy=[2, 3, 4, 5, 6, 7, 8,
                                                              9])  # http://stackoverflow.com/questions/17952279/logarithmic-y-axis-bins-in-python
-    filename = "%s-%s-%s.png" % (os.path.split(db.name())[-1], scope_name, metric)
+    filename = "%s-%s-%s.png" % (filename_prefix, scope_name, metric)
     plt.savefig(filename, dpi=72)
     return filename

@@ -54,7 +54,7 @@ Author:
 
 import datetime
 import sys
-
+import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_histogram
 
@@ -93,7 +93,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         #bin_count = max (10, int (20 * math.log(abs(1+max_value),10)))
         file_name = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                    bool(cmdline_arguments["--logarithmic"]),
-                                   db,
+                                   os.path.split(db.name())[-1],
                                    max_value,
                                    metric,
                                    metric_values_as_list,
