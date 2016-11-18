@@ -177,7 +177,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     last_all_values = [] # fix for #21, to reuse values
     last_max_value_found = -1
     stats_cache = {}  # fix for #22 - use cached value for stats
-    for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
+    sorted_metrics = sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting)
+    for metric in sorted_metrics:
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
         lambda_stats = None
@@ -188,8 +189,9 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         if lambda_stats is None:  # regular, not stats
             max_value_found = -1
             entity_with_max_value_found = None
+            has_stats_counterpart = (":%s" % metric) in "".join(sorted_metrics)
             for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes=skip_zeroes):
-                if save_histograms:
+                if save_histograms or has_stats_counterpart: # fix for #22 - cache values for stats
                     all_values.append(metric_value)
                 if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
                     highest_values_found_by_metric[metric] = metric_value
@@ -222,23 +224,23 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                                                                                                  skip_zeroes=skip_zeroes):
                     yield metric_value
 
-            try:
-                if adjusted_metric == last_processed_metric: # fix for #21 - reuses values, thanks to sorting we know teh pure metric must have come just before
-                    all_values = last_all_values
-                    max_value_found = last_max_value_found
-                else:
-                    all_values = [value for value in metric_values()]
-                    if save_histograms:
-                        max_value_found = max(all_values) if len(all_values) > 0 else 0
-                    last_processed_metric = adjusted_metric  # fix for 21. in case only stats functions are used, not the pure one.
-                    last_all_values = all_values # fix for #21, same as above
-                    last_max_value_found = max_value_found # fix for #21, same as above
-                stats_value = stats_cache.get(adjusted_metric, {}).get(lambda_name, None) # fix for #22 - used cached value for stats
-                if stats_value is None:
+            if adjusted_metric == last_processed_metric: # fix for #21 - reuses values, thanks to sorting we know teh pure metric must have come just before
+                all_values = last_all_values
+                max_value_found = last_max_value_found
+            else:
+                all_values = [value for value in metric_values()]
+                if save_histograms:
+                    max_value_found = max(all_values) if len(all_values) > 0 else 0
+                    last_max_value_found = max_value_found  # fix for #21, same as above
+                last_processed_metric = adjusted_metric  # fix for 21. in case only stats functions are used, not the pure one.
+                last_all_values = all_values  # fix for #21, same as above
+            stats_value = stats_cache.get(adjusted_metric, {}).get(lambda_name, None) # fix for #22 - used cached value for stats
+            if stats_value is None:
+                try:
                     stats_value = lambda_stats(all_values)
-            except statistics.StatisticsError as se:
-                print ("ERROR: %s" % se)
-                continue
+                except statistics.StatisticsError as se:
+                    print ("ERROR in %s: %s" % (metric, se))
+                    continue
 
             highest_values_found_by_metric[metric] = stats_value
             if stats_value > max_allowed_value:  # we found a violation
