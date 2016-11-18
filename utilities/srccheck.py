@@ -173,6 +173,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
     highest_values_found_by_metric = {}
+    last_processed_metric = "" # fix for #21, to reuse values
+    last_all_values = [] # fix for #21, to reuse values
     for metric in sorted(max_values_allowed_by_metric.keys(), key=metric_name_for_sorting):
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
@@ -204,6 +206,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value), end="")
                 lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
                 print("...........................................")
+            last_processed_metric = metric  # fix for #21, to reuse values
+            last_all_values = all_values  # fix for #21, to reuse values
         else: # stats, compute on the whole population
             def metric_values(): # generator of a stream of float values, to be consumed by the stats functions
                 for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, adjusted_metric,
@@ -216,7 +220,12 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     yield metric_value
 
             try:
-                all_values = [value for value in metric_values()]
+                if adjusted_metric == last_processed_metric: # fix for #21 - reuses values, thanks to sorting we know teh pure metric must have come just before
+                    all_values = last_all_values
+                else:
+                    all_values = [value for value in metric_values()]
+                    last_processed_metric = adjusted_metric  # fix for 21. in case only stats functions are used, not the pure one.
+                    last_all_values = all_values # fix for #21, same as above
                 stats_value = lambda_stats(all_values)
             except statistics.StatisticsError as se:
                 print ("ERROR: %s" % se)
