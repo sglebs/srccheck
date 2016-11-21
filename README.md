@@ -149,6 +149,33 @@ the average goes above 2.2 or the standard deviation goes above 1.8. This allows
 only maximum values of your outliers, but also averages and the spread (how far off they spread).
 We use the stats functions in https://docs.python.org/3/library/statistics.html .
 
+Adaptive KALOI
+==============
+As you evolve your code and improve your metrics, the max values used in the command-line
+to *srchcheck* will probably need to be revisited and adjusted, to keep your metric improvement
+initiative steady. This process requires adjusting build scripts, and can be tedious. Because of
+this, *srccheck* has adaptive support: it automatically lowers the maximum value accepted for 
+the metric to the new, improved value, every time you manage to lower the current max value of that metric.
+
+To make use of this feature, you will need two things:
+
+   * use the -a flag (enables the adaptive behaviour)
+   * pass file paths to json files instead of literal values to these parameters: --maxPrjMetrics , --maxFileMetrics, --maxClassMetrics, --maxRoutineMetrics
+
+The json files will be modified in-place by *srccheck* with the new max limits, lowering the ones you managed to lower.
+You are using *srccheck* to "lower the lid" of your KALOI initiative. Example:
+
+```
+srccheck --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/messenger-server.udb --maxFileMetrics=./messenger-server/maxFileMetrics.json --maxClassMetrics=./messenger-server/maxClassMetrics.json --maxRoutineMetrics=./messenger-server/maxRoutineMetrics.json --maxPrjMetrics=./messenger-server/maxPrjMetrics.json -a
+```
+
+If you run the command above and maxFileMetrics.json has this in it: {"AVG:CountDeclClass": 999, "CountDeclClass": 999, "STDEV:CountDeclClass": 999}
+then after the run it will look like this: {"AVG:CountDeclClass": 3.3, "CountDeclClass": 30, "STDEV:CountDeclClass": 5.78013840664737}
+
+If we manage to lower the maximum number of classes a file can have (CountDeclClass) from 30 to 28, then 28 will
+automatically become the new maximum acceptable value for this metric, thanks to the -a flag.
+
+
 Histograms
 ==========
 Sometimes metric values are very high and we want to visualize how the values are spread and their frequencies. 
