@@ -152,15 +152,21 @@ We use the stats functions in https://docs.python.org/3/library/statistics.html 
 Histograms
 ==========
 Sometimes metric values are very high and we want to visualize how the values are spread and their frequencies. 
-With that in mind the *srcplot* tools was implemented and is bundled in - it plots histograms of the values found 
+With that in mind we added support to generate histograms from *srccheck*. The relevant flags are:
+
+  * -H : enables histogram generation
+  * -l : use the logarithmic scale (default is false - linear scale is the default)
+  * -m : show the mean (avg) and median as two vertical lines in the graph
+  
+PNG files will be generated in the current dir, with the various histograms.  
+
+If you just want to see the histograms without worrying about metric limits, the *srcplot* tool
+is bundled in and can be used - it plots histograms of the values found 
 for the metric(s) you choose. It is similar to *srccheck* to run, with some minor differences. One of them is that 
 you pass a comma-separated list of metric names for File, Class and Routine (and not max values as a json, as 
-with *srccheck* itself). You can also choose to plot the histogram using a logarithmic scale for the y axis 
-(-l flag). In cases you get too many occurrences of zero for the metric value and want to discard those, 
-to focus on values > 0, you can pass a flag for that (-z). The tool will output PNG files in the current 
-directory, one for each metric.
+with *srccheck* itself). It also takes these same flags as above: -l , -m.
 
-Here's how to plot histograms for some metrics for the Django project:
+Here's how to just plot histograms for some metrics for the Django project:
 
 ```
 srcplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --fileMetrics=CountLineCode,CountDeclFunction,CountDeclClass --classMetrics=CountDeclMethod,MaxInheritanceTree --routineMetrics=CountLineCode,CountParams,CyclomaticStrict -l
