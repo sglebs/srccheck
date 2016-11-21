@@ -100,14 +100,16 @@ class DummyEntity:
     def longname(self):
         return ""
 
-def _print_routine_violation(routine, metric_name, metric_value):
-    print("%s\t%s\t%s" % (metric_name, metric_value, routine.longname()))
+def _print_routine_violation(routine, metric_name, metric_value, container_file=None):
+    print("%s\t%s\t%s%s" % (metric_name, metric_value, routine.longname(),
+                            "" if container_file == None else "\t(in %s)" % container_file.longname()))
 
-def _print_file_violation(file, metric_name, metric_value):
+def _print_file_violation(file, metric_name, metric_value, container_file=None):
     print("%s\t%s\t%s " % (metric_name, metric_value, file.longname()))
 
-def _print_class_violation(a_class, metric_name, metric_value):
-    print("%s\t%s\t%s " % (metric_name, metric_value, a_class.longname()))
+def _print_class_violation(a_class, metric_name, metric_value, container_file=None):
+    print("%s\t%s\t%s%s" % (metric_name, metric_value, a_class.longname(),
+                            "" if container_file == None else "\t(in %s)" % container_file.longname()))
 
 def _print_metric_violation(metric_name, metric_value, max_value):
     print ("%s:\t%s>%s" % (metric_name, metric_value, max_value))
@@ -198,7 +200,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 max_allowed = max_values_allowed_by_metric[metric]
                 if metric_value > max_allowed: # we found a violation
                     violation_count = violation_count + 1
-                    lambda_to_print(entity, metric, metric_value)
+                    lambda_to_print(entity, metric, metric_value, container_file=container_file)
                 if metric_value > max_value_found: # max found, which could be a violator or not
                     max_value_found = metric_value
                     entity_with_max_value_found = entity
@@ -207,8 +209,8 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 kind = "violator"
                 if max_value_found <= max_allowed_value:
                     kind = "non violator"
-                print("INFO: HIGHEST %s %s found (violation threshold is %s):" % (metric, kind, max_allowed_value), end="")
-                lambda_to_print(entity_with_max_value_found, metric, max_value_found) # prints the max found, which may be a violator or not
+                print("INFO: HIGHEST %s %s found (violation threshold is %s):\t" % (metric, kind, max_allowed_value), end="")
+                lambda_to_print(entity_with_max_value_found, metric, max_value_found, container_file=container_file) # prints the max found, which may be a violator or not
                 print("...........................................")
             last_processed_metric = metric  # fix for #21, to reuse values
             last_all_values = all_values  # fix for #21, to reuse values
