@@ -41,7 +41,7 @@ Options:
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
   --maxPrjMetrics=<maxPrjMetrics>               A JSON dictionary containing max values for the Prj metrics you want to limit. These will also be output in the CSV. [default: {"AvgCyclomatic":4,"MaxNesting":5}]
   --maxFileMetrics=<maxFileMetrics>             A JSON dictionary containing max values for File metrics you want to limit. These will also be output in the CSV. [default: {"CountLineCode":3000,"CountDeclFunction":50,"CountDeclClass":10,"CountDeclModule":5}]
-  --maxClassMetrics=<maxClassMetrics>           A JSON dictionary containing max values for Class metrics you want to limit. These will also be output in the CSV. [default: {"CountDeclMethod":30,"PercentLackOfCohesion":50, "MaxInheritanceTree":6}]
+  --maxClassMetrics=<maxClassMetrics>           A JSON dictionary containing max values for Class metrics you want to limit. These will also be output in the CSV. [default: {"CountDeclMethod":30,"AVG:PercentLackOfCohesion":50, "MaxInheritanceTree":6, "CountClassCoupled": 250}]
   --maxRoutineMetrics=<maxClassMetrics>         A JSON dictionary containing max values for Class metrics you want to limit. These will also be output in the CSV. [default: {"CountLineCode":100,"CountParams":20,"CyclomaticStrict":12}]
   --outputCSV=<outputCSV>                       Output CSV file path with the current metrics listed at --maxPrjMetrics. Useful with the Jenkins/Plot plugin [default: srcmetrics.csv]
   --sonarURL=<sonarURL>                         URL to post metrics into Sonar [default: http://localhost:9000/api/manual_measures]
