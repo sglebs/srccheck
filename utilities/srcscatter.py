@@ -14,6 +14,9 @@ Usage:
                 [--xMetric=<xMetric>] \r\n \
                 [--yMetric=<yMetric>] \r\n \
                 [--ballMetric=<ballMetric>] \r\n \
+                [--ballSizeMin=<ballSizeMin>] \r\n \
+                [--ballSizeMax=<ballSizeMax>] \r\n \
+                [--ballSizeRate=<ballSizeRate>] \r\n \
                 [--scope=<scope>] \r\n \
                 [--skipZeroes]  \r\n \
                 [--verbose]
@@ -33,6 +36,9 @@ Options:
   --xMetric=<xMetric>                           Name of metric to use in the x axis. [default: CountLineCode]
   --yMetric=<yMetric>                           Name of metric to use in the y axis. [default: CountDeclClass]
   --ballMetric=<ballMetric>                     Name of metric to use for ball sizes. [Default: AvgCyclomaticModified]
+  --ballSizeMin=<ballSizeMin>                   Minimal size of the ball (when the metric is zero). [Default: 10]
+  --ballSizeMax=<ballSizeMax>]                  Maximal size of the ball [Default: 300]
+  --ballSizeRate=<ballSizeRate>]                Rate at which the ball size grows per unit of the metric. [Default: 10]
   --scope=<scope>                               if the metric is applied to File|Class|Routine [default: File]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero [default: false]
@@ -90,6 +96,9 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
 
     ball_values = []
     color_values = []
+    ball_size_min = float(cmdline_arguments["--ballSizeMin"])
+    ball_size_max = float(cmdline_arguments["--ballSizeMax"])
+    ball_size_rate = float(cmdline_arguments["--ballSizeRate"])
     ball_metric_name = cmdline_arguments["--ballMetric"]
     for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities,
                                                                                      ball_metric_name,
@@ -99,7 +108,7 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      regex_ignore_files,
                                                                                      cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
-        ball_values.append(10 * metric_value + 10)
+        ball_values.append(min(ball_size_max,ball_size_rate * metric_value + ball_size_min))
         color_values.append(os.path.dirname(container_file.longname()).__hash__())
     if len(x_values) == len(y_values):
         file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name, color_values, os.path.split(db.name())[-1], scope_name)
