@@ -70,7 +70,7 @@ class AnnoteFinder(object):
                 m.set_visible(not m.get_visible())
             self.ax.figure.canvas.draw_idle()
         else:
-            t = ax.text(x, y, " - %s" % (annote),)
+            t = ax.text(x, y, "%s" % (annote),horizontalalignment="center", size="small", backgroundcolor="white")
             m = ax.scatter([x], [y], marker='d', c='r', zorder=100)
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
