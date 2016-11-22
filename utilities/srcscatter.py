@@ -99,7 +99,7 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      regex_ignore_files,
                                                                                      cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
-        ball_values.append(3.14 * (metric_value * metric_value) + 10)
+        ball_values.append(10 * metric_value + 10)
         color_values.append(os.path.dirname(container_file.longname()).__hash__())
     if len(x_values) == len(y_values):
         file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name, color_values, os.path.split(db.name())[-1], scope_name)
