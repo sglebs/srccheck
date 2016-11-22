@@ -15,6 +15,7 @@ setup(
         'console_scripts': [
             'srccheck = utilities.srccheck:main',
             'srcplot = utilities.srcplot:main',
+            'srcscatter = utilities.srcscatter:main',
         ],
     }
 )
