@@ -94,3 +94,14 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
     filename = "%s-%s-%s.png" % (filename_prefix, scope_name, metric)
     plt.savefig(filename, dpi=72)
     return [filename, mean, median, pstdev]
+
+
+def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, filename_prefix, scope_name):
+    plt.figure()  # new one, or they will be mixed
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title("%s - %s" % (scope_name, ball_label))
+    plt.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
+    filename = "%s-scatter-%s-%s_%s_%s.png" % (filename_prefix, scope_name, x_label, y_label, ball_label)
+    plt.savefig(filename, dpi=72)
+    return filename
