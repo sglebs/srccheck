@@ -19,7 +19,8 @@ Usage:
                 [--ballSizeRate=<ballSizeRate>] \r\n \
                 [--scope=<scope>] \r\n \
                 [--skipZeroes]  \r\n \
-                [--verbose]
+                [--verbose] \r\n \
+                [--interactive]
 
 
 Options:
@@ -42,6 +43,7 @@ Options:
   --scope=<scope>                               if the metric is applied to File|Class|Routine [default: File]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero [default: false]
+  -i, --interactive                             If you want to click around a window with the scatter plot, to see item names [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -61,7 +63,7 @@ import sys
 import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_scatter
-
+from matplotlib import pyplot as plt
 
 def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, scope_name):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
@@ -70,6 +72,8 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
     skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
+
+    annotations = []
 
     x_values = []
     x_metric_name = cmdline_arguments["--xMetric"]
@@ -81,6 +85,9 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
         x_values.append(metric_value)
+        entity_name = entity.relname() if scope_name == "File" else entity.longname()
+        annotations.append(entity_name)
+
 
     y_values = []
     y_metric_name = cmdline_arguments["--yMetric"]
@@ -109,12 +116,15 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
         ball_values.append(min(ball_size_max,ball_size_rate * metric_value + ball_size_min))
-        color_values.append(os.path.dirname(container_file.longname()).__hash__())
+        color_values.append(hash(os.path.dirname(container_file.longname())))
     if len(x_values) == len(y_values):
-        file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name, color_values, os.path.split(db.name())[-1], scope_name)
+        file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name, color_values, annotations, os.path.split(db.name())[-1], scope_name)
         print("Saved %s" % file_name)
         if len(x_values) > len(ball_values):
             print("WARNING. No values for metric %s (ball sizes)" % ball_metric_name)
+        if cmdline_arguments["--interactive"]:
+            plt.show()
+
     else:
         axis_with_missing_data = "X" if len(x_values)==0 else "Y"
         metric_with_missing_data = x_metric_name if len(x_values)==0 else y_metric_name

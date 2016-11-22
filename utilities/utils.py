@@ -3,6 +3,7 @@ import re
 import statistics
 
 from matplotlib import pyplot as plt
+from utilities.graph_annotator import AnnoteFinder
 
 
 def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes = False ):
@@ -96,12 +97,17 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
     return [filename, mean, median, pstdev]
 
 
-def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, filename_prefix, scope_name):
-    plt.figure()  # new one, or they will be mixed
+def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, annotations, filename_prefix, scope_name):
+    #plt.figure()  # new one, or they will be mixed
+    fig, ax = plt.subplots()
+    ax.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.title("%s - %s" % (scope_name, ball_label))
-    plt.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
+    plt.title("%i %s - %s" % (len(x_values), scope_name, ball_label))
+    x_range = ax.get_xlim()
+    y_range = ax.get_ylim()
+    af = AnnoteFinder(x_values, y_values, annotations, ax=ax, xtol=(x_range[1]-x_range[0])/100.0, ytol=(y_range[1]-y_range[0])/100.0)
+    fig.canvas.mpl_connect('button_press_event', af)
     filename = "%s-scatter-%s-%s_%s_%s.png" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     plt.savefig(filename, dpi=72)
     return filename

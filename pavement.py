@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     version='0.0.5',
     install_requires=[
-        'docopt==0.6.2',
+        'docopt==0.6.3',
         'requests==2.10.0',
         'matplotlib==1.5.3'
     ],
