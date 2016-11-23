@@ -19,9 +19,7 @@ Usage:
                 [--ballSizeRate=<ballSizeRate>] \r\n \
                 [--scope=<scope>] \r\n \
                 [--skipZeroes]  \r\n \
-                [--verbose] \r\n \
-                [--interactive]
-
+                [--verbose]
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
@@ -43,7 +41,6 @@ Options:
   --scope=<scope>                               if the metric is applied to File|Class|Routine [default: File]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero [default: false]
-  -i, --interactive                             If you want to click around a window with the scatter plot, to see item names [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -63,7 +60,6 @@ import sys
 import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_scatter
-from matplotlib import pyplot as plt
 
 def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, scope_name):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
@@ -122,8 +118,6 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
         print("Saved %s" % file_name)
         if len(x_values) > len(ball_values):
             print("WARNING. No values for metric %s (ball sizes)" % ball_metric_name)
-        if cmdline_arguments["--interactive"]:
-            plt.show()
 
     else:
         axis_with_missing_data = "X" if len(x_values)==0 else "Y"

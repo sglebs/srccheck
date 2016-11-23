@@ -5,11 +5,13 @@ setup(
     name='srccheck',
     description='Source code KALOI (using Understand).',
     packages=find_packages(),
-    version='0.0.6',
+    version='0.0.7',
     install_requires=[
         'docopt==0.6.2',
         'requests==2.10.0',
-        'matplotlib==1.5.3'
+        'matplotlib==1.5.3',
+        'Jinja2==2.8',
+        'mpld3==0.3'
     ],
     entry_points={
         'console_scripts': [
