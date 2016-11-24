@@ -216,7 +216,7 @@ srcscatter --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Use
 
 ![scatter plot for Django functions](example2-django.png)
 
-The plot will be an html file, interactive - you can roll your mose on a circle
+The plot will be an html file, interactive - you can roll your mouse on a circle
 and it will show which element that is. (Not above - that's a screenshot).
 
 Run *srcscatter -h* to see details for the parameters it can take. 
