@@ -84,7 +84,6 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
                                                                                              regex_str_ignore_item,
                                                                                              regex_str_traverse_files,
                                                                                              regex_ignore_files,
-                                                                                             cmdline_arguments,
                                                                                              skip_zeroes=skip_zeroes):
                 yield metric_value
 

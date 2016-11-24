@@ -78,7 +78,6 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      regex_str_ignore_item,
                                                                                      regex_str_traverse_files,
                                                                                      regex_ignore_files,
-                                                                                     cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
         x_values.append(metric_value)
         entity_name = entity.relname() if scope_name == "File" else entity.longname()
@@ -93,7 +92,6 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      regex_str_ignore_item,
                                                                                      regex_str_traverse_files,
                                                                                      regex_ignore_files,
-                                                                                     cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
         y_values.append(metric_value)
 
@@ -109,7 +107,6 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
                                                                                      regex_str_ignore_item,
                                                                                      regex_str_traverse_files,
                                                                                      regex_ignore_files,
-                                                                                     cmdline_arguments,
                                                                                      skip_zeroes=skip_zeroes):
         ball_values.append(min(ball_size_max,ball_size_rate * metric_value + ball_size_min))
         color_values.append(hash(os.path.dirname(container_file.longname())))

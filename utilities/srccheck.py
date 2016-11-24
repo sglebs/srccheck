@@ -192,7 +192,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             max_value_found = -1
             entity_with_max_value_found = None
             has_stats_counterpart = (":%s" % metric) in "".join(sorted_metrics)
-            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes=skip_zeroes):
+            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, skip_zeroes=skip_zeroes):
                 if save_histograms or has_stats_counterpart: # fix for #22 - cache values for stats
                     all_values.append(metric_value)
                 if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
@@ -222,7 +222,6 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                                                                                                  regex_str_ignore_item,
                                                                                                  regex_str_traverse_files,
                                                                                                  regex_ignore_files,
-                                                                                                 cmdline_arguments,
                                                                                                  skip_zeroes=skip_zeroes):
                     yield metric_value
 

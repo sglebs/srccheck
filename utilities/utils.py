@@ -4,14 +4,14 @@ import statistics
 from matplotlib import pyplot as plt
 import mpld3
 
-def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, cmdline_arguments, skip_zeroes = False ):
+def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, skip_zeroes = False ):
     for entity in entities:
         library_name = entity.library()
         if library_name is not "" and skipLibraries:
             #            if verbose:
             #                print ("LIBRARY/SKIP: %s" % entity.longname())
             continue
-        if matches_regex(entity, regex_str_ignore_item, cmdline_arguments):
+        if matches_regex(entity, regex_str_ignore_item, verbose):
             if verbose:
                 print("ENTITY REGEX/SKIP: %s" % entity.longname())
             continue
@@ -28,11 +28,11 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
             if verbose:
                 print("WARNING: no container file: %s. NOT SKIPPING to be safe" % entity.longname())
         else:
-            if not matches_regex(container_file, regex_str_traverse_files, cmdline_arguments):
+            if not matches_regex(container_file, regex_str_traverse_files, verbose):
                 if verbose:
                     print("SKIP due to file traverse regex non-match: %s" % container_file.longname())
                 continue
-            if matches_regex(container_file, regex_ignore_files, cmdline_arguments):
+            if matches_regex(container_file, regex_ignore_files, verbose):
                 if verbose:
                     print("SKIP due to file ignore regex match: %s" % container_file.longname())
                 continue
@@ -55,7 +55,7 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
         yield [entity, container_file, metric, metric_value]
 
 
-def matches_regex (entity, regex_filter, cmdline_arguments):
+def matches_regex (entity, regex_filter, verbose=False):
     if regex_filter is None:
         return False
     try:
@@ -63,7 +63,6 @@ def matches_regex (entity, regex_filter, cmdline_arguments):
         regex_result = re.search(regex_filter, longname)
         return regex_result is not None
     except:
-        verbose = cmdline_arguments["--verbose"]
         if verbose:
             print ("REGEX/EXCEPTION: %s" % regex_filter)
         return False
