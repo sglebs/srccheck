@@ -79,13 +79,13 @@ Author:
 
 import datetime
 import json
+import os.path
 import statistics
 import sys
 
 import requests
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric, save_histogram
-import os.path
+from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -297,28 +297,6 @@ def append_dict_with_key_prefix (dict_to_grow, dict_to_append, prefix):
         dict_to_grow["%s %s" % (prefix, k)] = v
 
 
-def _generate_csv (cmdline_arguments, cur_tracked_metrics_for_csv):
-    csv_path = cmdline_arguments["--outputCSV"]
-    try:
-        file = open(csv_path, "w")
-        sep = ""
-        for metric_name,metric_value in sorted(cur_tracked_metrics_for_csv.items()):
-            file.write(sep)
-            file.write(metric_name)
-            sep = ","
-        file.write("\n")
-        sep = ""
-        for metric_name,metric_value in sorted(cur_tracked_metrics_for_csv.items()):
-            file.write(sep)
-            file.write(str(metric_value))
-            sep = ","
-        file.write("\n")
-        file.close()
-        print ("+++ Metrics saved to %s" % csv_path)
-    except:
-        print ("\n*** Problems creating CSV file %s" % csv_path)
-
-
 def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
     TIMEOUT = 4
     sonar_url = cmdline_arguments["--sonarURL"]
@@ -400,7 +378,12 @@ def main():
     append_dict_with_key_prefix (tracked_metrics, file_tracked_metrics, "File")
     append_dict_with_key_prefix (tracked_metrics, class_tracked_metrics, "Class")
     append_dict_with_key_prefix (tracked_metrics, routine_tracked_metrics, "Routine")
-    _generate_csv(arguments, tracked_metrics)
+    csv_ok = save_csv(arguments["--outputCSV"], tracked_metrics)
+    if csv_ok:
+        print("+++ Metrics saved to %s" % arguments["--outputCSV"])
+    else:
+        print ("\n*** Problems creating CSV file %s" % arguments["--outputCSV"])
+
     _post_to_sonar(arguments, tracked_metrics)
     print ("")
     end_time = datetime.datetime.now()

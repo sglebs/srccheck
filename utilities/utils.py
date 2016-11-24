@@ -106,3 +106,24 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     mpld3.save_html(fig, filename)
     return filename
+
+
+def save_csv (csv_path, cur_tracked_metrics_for_csv):
+    try:
+        file = open(csv_path, "w")
+        sep = ""
+        for metric_name,metric_value in sorted(cur_tracked_metrics_for_csv.items()):
+            file.write(sep)
+            file.write(metric_name)
+            sep = ","
+        file.write("\n")
+        sep = ""
+        for metric_name,metric_value in sorted(cur_tracked_metrics_for_csv.items()):
+            file.write(sep)
+            file.write(str(metric_value))
+            sep = ","
+        file.write("\n")
+        file.close()
+        return True
+    except:
+        return False
