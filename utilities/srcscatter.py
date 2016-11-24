@@ -18,7 +18,6 @@ Usage:
                 [--ballSizeMax=<ballSizeMax>] \r\n \
                 [--ballSizeRate=<ballSizeRate>] \r\n \
                 [--scope=<scope>] \r\n \
-                [--skipZeroes]  \r\n \
                 [--verbose]
 
 Options:
@@ -59,67 +58,53 @@ import datetime
 import sys
 import os
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric, save_scatter
+from utilities.utils import stream_of_entity_with_metrics, save_scatter
 
 def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, scope_name):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     entities = db.ents(entityQuery)
     skipLibraries = cmdline_arguments["--skipLibs"] == "true"
-    skip_zeroes = cmdline_arguments.get("--skipZeroes", False)
     verbose = cmdline_arguments["--verbose"]
 
     annotations = []
-
     x_values = []
     x_metric_name = cmdline_arguments["--xMetric"]
-    for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, x_metric_name,
-                                                                                     verbose, skipLibraries,
-                                                                                     regex_str_ignore_item,
-                                                                                     regex_str_traverse_files,
-                                                                                     regex_ignore_files,
-                                                                                     skip_zeroes=skip_zeroes):
-        x_values.append(metric_value)
-        entity_name = entity.relname() if scope_name == "File" else entity.longname()
-        annotations.append(entity_name)
-
-
     y_values = []
     y_metric_name = cmdline_arguments["--yMetric"]
-    for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities,
-                                                                                     y_metric_name,
-                                                                                     verbose, skipLibraries,
-                                                                                     regex_str_ignore_item,
-                                                                                     regex_str_traverse_files,
-                                                                                     regex_ignore_files,
-                                                                                     skip_zeroes=skip_zeroes):
-        y_values.append(metric_value)
-
     ball_values = []
     color_values = []
     ball_size_min = float(cmdline_arguments["--ballSizeMin"])
     ball_size_max = float(cmdline_arguments["--ballSizeMax"])
     ball_size_rate = float(cmdline_arguments["--ballSizeRate"])
     ball_metric_name = cmdline_arguments["--ballMetric"]
-    for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities,
-                                                                                     ball_metric_name,
+    metric_names = [x_metric_name, y_metric_name, ball_metric_name]
+    for entity, container_file, metric_dict in stream_of_entity_with_metrics(entities, metric_names,
                                                                                      verbose, skipLibraries,
                                                                                      regex_str_ignore_item,
                                                                                      regex_str_traverse_files,
-                                                                                     regex_ignore_files,
-                                                                                     skip_zeroes=skip_zeroes):
-        ball_values.append(min(ball_size_max,ball_size_rate * metric_value + ball_size_min))
+                                                                                     regex_ignore_files):
+        entity_name = entity.relname() if scope_name == "File" else entity.longname()
+        annotations.append(entity_name)
+        x_metric = metric_dict[x_metric_name]
+        if x_metric is None:
+            print("ERROR. Missing metric %s for X Axis" % x_metric)
+            return
+        x_values.append(x_metric)
+        y_metric = metric_dict[y_metric_name]
+        if y_metric is None:
+            print("ERROR. Missing metric %s for Y Axis" % y_metric)
+            return
+        y_values.append(y_metric)
+        ball_metric = metric_dict[ball_metric_name]
+        if ball_metric is None:
+            ball_metric = 0
+        ball_values.append(min(ball_size_max,ball_size_rate * ball_metric + ball_size_min))
         color_values.append(hash(os.path.dirname(container_file.longname())))
-    if len(x_values) == len(y_values):
-        file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name, color_values, annotations, os.path.split(db.name())[-1], scope_name)
-        print("Saved %s" % file_name)
-        if len(x_values) > len(ball_values):
-            print("WARNING. No values for metric %s (ball sizes)" % ball_metric_name)
+    file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
+                             color_values, annotations, os.path.split(db.name())[-1], scope_name)
+    print("Saved %s" % file_name)
 
-    else:
-        axis_with_missing_data = "X" if len(x_values)==0 else "Y"
-        metric_with_missing_data = x_metric_name if len(x_values)==0 else y_metric_name
-        print("ERROR. Axis %s with metric %s is empty" % (axis_with_missing_data, metric_with_missing_data))
 
 
 def main():

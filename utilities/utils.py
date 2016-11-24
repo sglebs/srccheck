@@ -4,7 +4,7 @@ import statistics
 from matplotlib import pyplot as plt
 import mpld3
 
-def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, skip_zeroes = False ):
+def stream_of_entity_with_metrics (entities, metrics, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files ):
     for entity in entities:
         library_name = entity.library()
         if library_name is not "" and skipLibraries:
@@ -37,11 +37,21 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
                     print("SKIP due to file ignore regex match: %s" % container_file.longname())
                 continue
         # real work
-        if metric == "CountParams":
-            metric_value = len(entity.ents("Define", "Parameter"))
-        else:
-            metric_dict = entity.metric((metric,))
-            metric_value = metric_dict.get(metric, 0)  # the call returns a dict
+        metric_dict = entity.metric(metrics)
+        if "CountParams" in metric_dict:
+            metric_dict ["CountParams"] = len(entity.ents("Define", "Parameter"))
+        yield [entity, container_file, metric_dict]
+
+
+
+def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, skip_zeroes = False ):
+    for entity, container_file, metric_dict in stream_of_entity_with_metrics(entities,
+                                                                                      (metric,),
+                                                                                     verbose, skipLibraries,
+                                                                                     regex_str_ignore_item,
+                                                                                     regex_str_traverse_files,
+                                                                                     regex_ignore_files):
+        metric_value = metric_dict.get(metric, 0)  # the call returns a dict
         if metric_value is None:
             continue
         if metric_value == 0:
@@ -53,6 +63,7 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
             if verbose:
                 print("WARNING: metric is negative %s" % entity)
         yield [entity, container_file, metric, metric_value]
+
 
 
 def matches_regex (entity, regex_filter, verbose=False):
