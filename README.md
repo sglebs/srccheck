@@ -210,9 +210,13 @@ If you want to see how 2 metrics correlate, you can produce a scatter plot with 
 the y axis and another one for the size of the balls (circles). Here's an
 example for Django sources:
 
+```
+srcscatter --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --scope=Routine --xMetric=CountLineCode --yMetric=CyclomaticModified --ballMetric=MaxNesting
+```
+
 ![scatter plot for Django functions](example2-django.png)
 
-Run *srcscatter -h* to see details for the parameters it can take. One of the
-most useful parameters is -i (interactive), which will open the scatter plot in a window and
-will allow you to click on the items and see who they are. The labels can be 
-hidden again by clicking again on the same spot.
+The plot will be an html file, interactive - you can roll your mose on a circle
+and it will show which element that is. (Not above - that's a screenshot).
+
+Run *srcscatter -h* to see details for the parameters it can take. 
