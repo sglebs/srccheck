@@ -219,4 +219,7 @@ srcscatter --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Use
 The plot will be an html file, interactive - you can roll your mouse on a circle
 and it will show which element that is. (Not above - that's a screenshot).
 
+Two items will have the same color if they belong to files in the same directory.
+This means that colors represent clustering/packaging, usually.
+
 Run *srcscatter -h* to see details for the parameters it can take. 

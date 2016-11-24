@@ -101,7 +101,7 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
     scatter = ax.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.title("%i %s - %s" % (len(x_values), scope_name, ball_label))
+    plt.title("%i %s items. Circle sizes: %s" % (len(x_values), scope_name, ball_label))
     tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
