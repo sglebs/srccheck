@@ -1,24 +1,24 @@
 """Source Code Stats Scatter Plot.
 
 Usage:
-  srcscatter    --in=<inputUDB> \r\n \
-                [--dllDir=<dllDir>]\r\n \
-                [--skipLibs=<skipLibs>]\r\n \
-                [--fileQuery=<fileQuery>]\r\n \
-                [--classQuery=<classQuery>]\r\n \
-                [--routineQuery=<routineQuery>]\r\n \
-                [--regexTraverseFiles=<regexTraverseFiles>] \r\n \
-                [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
-                [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
-                [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
-                [--xMetric=<xMetric>] \r\n \
-                [--yMetric=<yMetric>] \r\n \
-                [--ballMetric=<ballMetric>] \r\n \
-                [--ballSizeMin=<ballSizeMin>] \r\n \
-                [--ballSizeMax=<ballSizeMax>] \r\n \
-                [--ballSizeRate=<ballSizeRate>] \r\n \
-                [--scope=<scope>] \r\n \
-                [--verbose]
+  srcscatterplot    --in=<inputUDB> \r\n \
+                    [--dllDir=<dllDir>]\r\n \
+                    [--skipLibs=<skipLibs>]\r\n \
+                    [--fileQuery=<fileQuery>]\r\n \
+                    [--classQuery=<classQuery>]\r\n \
+                    [--routineQuery=<routineQuery>]\r\n \
+                    [--regexTraverseFiles=<regexTraverseFiles>] \r\n \
+                    [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
+                    [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
+                    [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
+                    [--xMetric=<xMetric>] \r\n \
+                    [--yMetric=<yMetric>] \r\n \
+                    [--ballMetric=<ballMetric>] \r\n \
+                    [--ballSizeMin=<ballSizeMin>] \r\n \
+                    [--ballSizeMax=<ballSizeMax>] \r\n \
+                    [--ballSizeRate=<ballSizeRate>] \r\n \
+                    [--scope=<scope>] \r\n \
+                    [--verbose]
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
