@@ -223,3 +223,38 @@ Two items will have the same color if they belong to files in the same directory
 This means that colors represent clustering/packaging, usually.
 
 Run *srcscatterplot -h* to see details for the parameters it can take.
+
+OO Instability and Abstractness Plots
+=====================================
+ Bob Martin's whitepaper "OO Design Quality Metrics - An Analysis of Dependencies" describes
+ two metrics - Instability and Abstractness - and how a good arquitecture should look
+ like in such a graph. Some tools like PHP_Depend have support for it, as shown at
+ https://pdepend.org/documentation/handbook/reports/abstraction-instability-chart.html
+ 
+ We include a utility that can take a CSV as input, containing these values, and can
+ plot such a graph: *srcinstplot*. Example:
+ 
+```
+srcinstplot --in=instability-myProject.csv 
+```
+ 
+ The CSV file should look like this:
+
+```
+Component,Size,Complexity,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance
+foo.bar,44,2,0,6,0.000000,2,0,0.000000,0.707107,1.000000
+```
+
+The Component column will have the names of your components - package names (Java) or namespace names (C#) or Units (Pascal).
+The result shoudl look like the graph below.
+
+![Instability plot for a project](example-instability.png)
+
+If you roll the mouse on the circles, their names are shown, as well as the metrics that represent the cicrcle size and
+the circle color. Run the utility with -h for a detailed description of the parameters.
+ 
+We also have a tool that generates such CSV files from an Understand UDB file, but it is not Open Source.
+Feel free to contact us if you would like to use it.
+ 
+ 
+ 

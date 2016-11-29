@@ -18,6 +18,7 @@ setup(
             'srccheck = utilities.srccheck:main',
             'srchistplot = utilities.srchistplot:main',
             'srcscatterplot = utilities.srcscatterplot:main',
+            'srcinstplot = utilities.srcinstplot:main',
         ],
     }
 )
