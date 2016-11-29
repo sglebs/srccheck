@@ -243,10 +243,12 @@ srcinstplot --in=instability-myProject.csv
 ```
 Component,Size,Complexity,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance
 foo.bar,44,2,0,6,0.000000,2,0,0.000000,0.707107,1.000000
+... 
+...
 ```
 
 The Component column will have the names of your components - package names (Java) or namespace names (C#) or Units (Pascal).
-The result shoudl look like the graph below.
+The result should look like the graph below.
 
 ![Instability plot for a project](example-instability.png)
 
