@@ -16,7 +16,7 @@ setup(
     entry_points={
         'console_scripts': [
             'srccheck = utilities.srccheck:main',
-            'srcplot = utilities.srcplot:main',
+            'srchist = utilities.srchist:main',
             'srcscatter = utilities.srcscatter:main',
         ],
     }

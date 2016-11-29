@@ -1,7 +1,7 @@
-"""Source Code Stats Plot.
+"""Source Code Histogram Plot.
 
 Usage:
-  srcplot       --in=<inputUDB> \r\n \
+  srchist       --in=<inputUDB> \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
                 [--fileQuery=<fileQuery>]\r\n \

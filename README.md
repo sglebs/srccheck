@@ -187,7 +187,7 @@ With that in mind we added support to generate histograms from *srccheck*. The r
   
 PNG files will be generated in the current dir, with the various histograms.  
 
-If you just want to see the histograms without worrying about metric limits, the *srcplot* tool
+If you just want to see the histograms without worrying about metric limits, the *srchist* tool
 is bundled in and can be used - it plots histograms of the values found 
 for the metric(s) you choose. It is similar to *srccheck* to run, with some minor differences. One of them is that 
 you pass a comma-separated list of metric names for File, Class and Routine (and not max values as a json, as 
@@ -196,7 +196,7 @@ with *srccheck* itself). It also takes these same flags as above: -l , -m.
 Here's how to just plot histograms for some metrics for the Django project:
 
 ```
-srcplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --fileMetrics=CountLineCode,CountDeclFunction,CountDeclClass --classMetrics=CountDeclMethod,MaxInheritanceTree --routineMetrics=CountLineCode,CountParams,CyclomaticStrict -l
+srchist --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --fileMetrics=CountLineCode,CountDeclFunction,CountDeclClass --classMetrics=CountDeclMethod,MaxInheritanceTree --routineMetrics=CountLineCode,CountParams,CyclomaticStrict -l
 ```
 
 One of the files that the line above will output will look like this:
