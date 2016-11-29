@@ -1,7 +1,7 @@
 """Source Code Histogram Plot.
 
 Usage:
-  srchist       --in=<inputUDB> \r\n \
+  srchistplot   --in=<inputUDB> \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
                 [--fileQuery=<fileQuery>]\r\n \
