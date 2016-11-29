@@ -206,12 +206,12 @@ One of the files that the line above will output will look like this:
 Scatter Plots
 =============
 If you want to see how 2 metrics correlate, you can produce a scatter plot with the
-*srcscatter* tool, also bundled in. It accepts a metric for the x axis, one for 
+*srcscatterplot* tool, also bundled in. It accepts a metric for the x axis, one for
 the y axis and another one for the size of the balls (circles). Here's an
 example for Django sources:
 
 ```
-srcscatter --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --scope=Routine --xMetric=CountLineCode --yMetric=CyclomaticModified --ballMetric=MaxNesting
+srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --scope=Routine --xMetric=CountLineCode --yMetric=CyclomaticModified --ballMetric=MaxNesting
 ```
 
 ![scatter plot for Django functions](example2-django.png)
@@ -222,4 +222,4 @@ and it will show which element that is. (Not above - that's a screenshot).
 Two items will have the same color if they belong to files in the same directory.
 This means that colors represent clustering/packaging, usually.
 
-Run *srcscatter -h* to see details for the parameters it can take. 
+Run *srcscatterplot -h* to see details for the parameters it can take.
