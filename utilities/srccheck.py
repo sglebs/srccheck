@@ -21,6 +21,7 @@ Usage:
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--verbose] \r\n \
+                [--skipPrjMetrics=<skipPrjMetrics>]\r\n \
                 [--skipZeroes] \r\n \
                 [--adaptive] \r\n \
                 [--logarithmic]  \r\n \
@@ -54,6 +55,7 @@ Options:
   -H, --histograms                              If you want srccheck to save histograms, just like srcplot does
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
   -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
+  --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -114,13 +116,18 @@ def _print_class_violation(a_class, metric_name, metric_value, container_file=No
 def _print_metric_violation(metric_name, metric_value, max_value):
     print ("%s:\t%s>%s" % (metric_name, metric_value, max_value))
 
-def print_prj_metrics (db, cmdline_arguments):
-    metrics = db.metric(db.metrics())
-    for k,v in sorted(metrics.items()):
-        print (k,"=",v)
+def project_metrics(db, cmdline_arguments):
+    skip_set = set(cmdline_arguments["--skipPrjMetrics"].split(","))
+    all_metric_names = db.metrics()
+    selected_metric_names = [metric for metric in all_metric_names if metric not in skip_set]
+    return db.metric(selected_metric_names)
+
+def print_prj_metrics (prj_metrics):
+    for k,v in sorted(prj_metrics.items()):
+        print(k,"=",v)
 
 
-def process_prj_metrics (db, cmdline_arguments):
+def process_prj_metrics (cmdline_arguments, prj_metrics):
     max_metrics_json = cmdline_arguments["--maxPrjMetrics"]
     max_metrics = {}
     violation_count = 0
@@ -135,10 +142,9 @@ def process_prj_metrics (db, cmdline_arguments):
     if len(max_metrics) == 0: # No metrics passed in
         print ("*** EMPTY PRJ Max Metrics. JSON error? (%s)" % max_metrics_json)
         return [0, {}]
-    metrics = db.metric(db.metrics())
     max_metrics_found = {}
     for metric,max_value in max_metrics.items():
-        cur_value = metrics.get(metric,None)
+        cur_value = prj_metrics.get(metric, None)
         if cur_value is not None:
             max_metrics_found [metric] = cur_value
             if cur_value > max_value:
@@ -347,10 +353,11 @@ def main():
 
     adaptive = arguments.get("--adaptive", False)
     print ("\r\n====== Project Metrics (%s) (%s) ==========" % (db.name(), db.language()[0]))
-    print_prj_metrics(db, arguments)
+    prj_metrics = project_metrics(db, arguments)
+    print_prj_metrics(prj_metrics)
     print ("")
     print ("\r\n====== Project Metrics that failed the filters  ===========")
-    [total_violation_count , prj_tracked_metrics] = process_prj_metrics(db, arguments)
+    [total_violation_count , prj_tracked_metrics] = process_prj_metrics(arguments, prj_metrics)
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxPrjMetrics", False), prj_tracked_metrics)
     print ("")
