@@ -72,6 +72,8 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
 def matches_regex (entity, regex_filter, verbose=False):
     if regex_filter is None:
         return False
+    if len(regex_filter) == 0:  # fixes #33 - empty string is the same as no parameter
+        return False
     try:
         longname = entity.longname()
         regex_result = re.search(regex_filter, longname)
