@@ -118,7 +118,7 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
     mpld3.save_html(fig, filename)
     return filename
 
-def save_normalized_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, annotations, filename_prefix, scope_name, show_diagonal=True):
+def save_abstractness_x_instability_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, color_label, annotations, filename_prefix, scope_name, show_diagonal=True):
     #plt.figure()  # new one, or they will be mixed
     fig, ax = plt.subplots()
     ax.set_xticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]) # http://stackoverflow.com/questions/8209568/how-do-i-draw-a-grid-onto-a-plot-in-python
@@ -136,7 +136,7 @@ def save_normalized_scatter(x_values, x_label, y_values, y_label, ball_values, b
     scatter = ax.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.title("%i %s items. Circles: %s" % (len(x_values), scope_name, ball_label))
+    plt.title("%i %s items. Circles: %s & %s" % (len(x_values), scope_name, ball_label, color_label))
     tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)

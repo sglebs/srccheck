@@ -241,18 +241,21 @@ srcinstplot --in=instability-myProject.csv
  The CSV file should look like this:
 
 ```
-Component,Size,Complexity,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance
+Component,CountLineCode,SumCyclomaticModified,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance
 foo.bar,44,2,0,6,0.000000,2,0,0.000000,0.707107,1.000000
 ... 
 ...
 ```
 
 The Component column will have the names of your components - package names (Java) or namespace names (C#) or Units (Pascal).
+The second and third column can have any names - they should represent metrics for Size (circle sizes in the graph)
+and Complexity (circle colors in the graph).
+
 The result should look like the graph below.
 
 ![Instability plot for a project](example-instability.png)
 
-If you roll the mouse on the circles, their names are shown, as well as the metrics that represent the cicrcle size and
+If you roll the mouse on the circles, their names are shown, as well as the metrics that represent the circle size and
 the circle color. Run the utility with -h for a detailed description of the parameters.
  
 We also have a tool that generates such CSV files from an Understand UDB file, but it is not Open Source.

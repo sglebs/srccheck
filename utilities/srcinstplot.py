@@ -3,10 +3,10 @@
 Usage:
   srcinstplot   --in=<inputCSV> \r\n \
                 [--nameColumn=<anInteger>] \r\n \
-                [--sizeColumn=<anInteger>] \r\n \
-                [--complexityColumn=<anInteger>] \r\n \
-                [--abstractnessColumn=<anInteger>] \r\n \
-                [--instabilityColumn=<anInteger>] \r\n \
+                [--sizeColumn=<columnName>] \r\n \
+                [--complexityColumn=<columnName>] \r\n \
+                [--abstractnessColumn=<columnName>] \r\n \
+                [--instabilityColumn=<columnName>] \r\n \
                 [--ballSizeMin=<ballSizeMin>] \r\n \
                 [--ballSizeMax=<ballSizeMax>] \r\n \
                 [--ballSizeRate=<ballSizeRate>]
@@ -17,8 +17,8 @@ Options:
     --abstractnessColumn=<columnName>   Name of the column in the CSV with the Abstractness values. [default: Abstractness]
     --instabilityColumn=<columnName>    Name of the column in the CSV with the Imstability values. [default: Instability]
     --nameColumn=<columnName>           Name of the column in the CSV with the component/package names. [default: Component]
-    --sizeColumn=<columnName>           Name of the column in the CSV with the component/package sizes. [default: Size]
-    --complexityColumn=<columnName>     Name of the column in the CSV with the component/package complexity. [default: Complexity]
+    --sizeColumn=<columnName>           Name of the column in the CSV with the component/package sizes. [default: CountLineCode]
+    --complexityColumn=<columnName>     Name of the column in the CSV with the component/package complexity. [default: SumCyclomaticModified]
     --ballSizeMin=<ballSizeMin>         Minimum size of the ball (when the metric is zero). [Default: 20]
     --ballSizeMax=<ballSizeMax>         Maximum size of the ball [Default: 5000]
     --ballSizeRate=<ballSizeRate>       Rate at which the ball size grows per unit of the metric. [Default: 0.1]
@@ -33,7 +33,7 @@ import datetime
 import os
 import csv
 from docopt import docopt
-from utilities.utils import save_normalized_scatter
+from utilities.utils import save_abstractness_x_instability_scatter
 
 def scatter_plot (cmdline_arguments):
     inputCSV = cmdline_arguments["--in"]
@@ -53,14 +53,14 @@ def scatter_plot (cmdline_arguments):
     with open(inputCSV, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            annotations.append("%s (LOC=%i, McCabe=%i)" % (row[nameColumn],int(row[sizeColumn]),int(row[complexityColumn])))
-            x_values.append(float(row[abstractnessColumn]))
-            y_values.append(float(row[instabilityColumn]))
-            ball_values.append(min(ball_size_max, ball_size_rate * int(row[sizeColumn]) + ball_size_min))
+            annotations.append("%s (%s=%i, %s=%i)" % (row[nameColumn],sizeColumn,int(row.get(sizeColumn,0)),complexityColumn, int(row.get(complexityColumn,0))))
+            x_values.append(float(row.get(abstractnessColumn,0)))
+            y_values.append(float(row.get(instabilityColumn,0)))
+            ball_values.append(min(ball_size_max, ball_size_rate * int(row.get(sizeColumn,0)) + ball_size_min))
 
-            color_values.append(int(row[complexityColumn]))
-    file_name = save_normalized_scatter(x_values, abstractnessColumn, y_values, instabilityColumn, ball_values, "LOC",
-                             color_values, annotations, os.path.split(inputCSV)[-1], "Component")
+            color_values.append(int(row.get(complexityColumn,0)))
+    file_name = save_abstractness_x_instability_scatter(x_values, abstractnessColumn, y_values, instabilityColumn, ball_values, sizeColumn,
+                                                        color_values, complexityColumn, annotations, os.path.split(inputCSV)[-1], "Component")
     print("Saved %s" % file_name)
 
 
