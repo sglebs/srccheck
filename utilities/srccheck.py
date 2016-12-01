@@ -52,7 +52,7 @@ Options:
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
   -a, --adaptive                                If you want srccheck to be adaptive and update the input json files with current max values
-  -H, --histograms                              If you want srccheck to save histograms, just like srcplot does
+  -H, --histograms                              If you want srccheck to save histograms, just like srchistplot does
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
   -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
   --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]

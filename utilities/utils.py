@@ -1,7 +1,10 @@
 import re
 import statistics
 
+from matplotlib import use as backend_use
+backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other import.
 from matplotlib import pyplot as plt
+plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
 
 def stream_of_entity_with_metrics (entities, metrics, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files ):

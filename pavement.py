@@ -5,7 +5,7 @@ setup(
     name='srccheck',
     description='Source code KALOI (using Understand).',
     packages=find_packages(),
-    version='0.0.8',
+    version='0.0.9',
     install_requires=[
         'docopt==0.6.2',
         'requests==2.10.0',
