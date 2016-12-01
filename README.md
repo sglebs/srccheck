@@ -42,6 +42,13 @@ Make sure your Python has paver installed (pip3 install paver) and then run:
 pip3 install git+https://github.com/sglebs/srccheck
 ```
 
+Under Linux, some users reported that you need to install some libraries before running:
+
+ * Ubuntu: sudo apt-get install python3-tk
+ * CentOS: yum install python3-tkinter
+
+
+
 How to Upgrade It
 =================
 
