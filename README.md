@@ -213,9 +213,19 @@ One of the files that the line above will output will look like this:
 Scatter Plots
 =============
 If you want to see how 2 metrics correlate, you can produce a scatter plot with the
-*srcscatterplot* tool, also bundled in. It accepts a metric for the x axis, one for
-the y axis and another one for the size of the balls (circles). Here's an
-example for Django sources:
+*srcscatterplot* tool, also bundled in. It accepts a JSON (literal or file path) where keys
+are scope names (either File or Class or Routine) and an arrays of configs (so you can generate
+multiple plots for each scope). Each config should have these keys (all optional, with defaults):
+
+ * xMetric: name of the Understand metric to collect for the X axis. Default: CountLineCode
+ * yMetric: name of the Understand metric to collect for the Y axis. Default: MaxCyclomaticModified
+ * ballMetric: name of the Understand metric to collect for the circle sizes. Default: MaxNesting
+ * ballSizeMin: Minimum size of the circles, even if the metric is 0. Default: 40
+ * ballSizeMax: Maximum size of the circles, even if the metric is very very large. Default: 4000
+ * ballSizeRate: How many units of size the circle grows per unit of the metric. Default: 10
+
+ 
+Here's an example for Django sources:
 
 ```
 srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --scope=Routine --xMetric=CountLineCode --yMetric=CyclomaticModified --ballMetric=MaxNesting

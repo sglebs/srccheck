@@ -11,13 +11,7 @@ Usage:
                     [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
                     [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                     [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
-                    [--xMetric=<xMetric>] \r\n \
-                    [--yMetric=<yMetric>] \r\n \
-                    [--ballMetric=<ballMetric>] \r\n \
-                    [--ballSizeMin=<ballSizeMin>] \r\n \
-                    [--ballSizeMax=<ballSizeMax>] \r\n \
-                    [--ballSizeRate=<ballSizeRate>] \r\n \
-                    [--scope=<scope>] \r\n \
+                    [--config=<jsonOrJsonFile>]\r\n \
                     [--verbose]
 
 Options:
@@ -31,13 +25,7 @@ Options:
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
-  --xMetric=<xMetric>                           Name of metric to use in the x axis. [default: CountLineCode]
-  --yMetric=<yMetric>                           Name of metric to use in the y axis. [default: CountDeclClass]
-  --ballMetric=<ballMetric>                     Name of metric to use for ball sizes. [Default: AvgCyclomaticModified]
-  --ballSizeMin=<ballSizeMin>                   Minimum size of the ball (when the metric is zero). [Default: 10]
-  --ballSizeMax=<ballSizeMax>                   Maximum size of the ball [Default: 300]
-  --ballSizeRate=<ballSizeRate>                 Rate at which the ball size grows per unit of the metric. [Default: 10]
-  --scope=<scope>                               if the metric is applied to File|Class|Routine [default: File]
+  --config=<jsonOrJsonFile>                     A json which configures the plots for the supported scopes (File, Class, Routine). [default: {"File":[{"xMetric":"CountLineCode", "yMetric":"MaxCyclomaticModified", "ballMetric":"MaxNesting"}], "Class":[{"xMetric":"CountLineCode", "yMetric":"CountClassCoupled", "ballMetric":"PercentLackOfCohesion"}], "Routine":[{"xMetric":"CountLineCode", "yMetric":"CyclomaticModified", "ballMetric":"MaxNesting"}]}]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero [default: false]
 
@@ -54,11 +42,29 @@ Author:
 
 """
 
+
+
+
 import datetime
 import sys
 import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metrics, save_scatter
+import json
+
+def load_config(config_json_or_path):
+    if os.path.isfile(config_json_or_path):
+        with open(config_json_or_path) as max_metrics_json:
+            try:
+                return json.load(max_metrics_json)
+            except:
+                return {}
+    else:
+        try:
+            return json.loads(config_json_or_path)
+        except:
+            return {}
+
 
 def scatter_plot (db, cmdline_arguments,
                   entityQuery,
@@ -128,38 +134,46 @@ def main():
         print ("Error opening input file: %s" % exc)
         sys.exit(-2)
 
-    scope_name = arguments["--scope"]
-    if scope_name == "File":
-        regex_str_ignore_item = arguments["--regexIgnoreFiles"]
-        entityQuery = arguments["--fileQuery"]
-    elif scope_name == "Class":
-        regex_str_ignore_item = arguments["--regexIgnoreClasses"]
-        entityQuery = arguments["--classQuery"]
-    else:
-        regex_str_ignore_item = arguments["--regexIgnoreRoutines"]
-        entityQuery = arguments["--routineQuery"]
-
     print("Processing %s" % db.name())
     end_time = datetime.datetime.now()
-    ok = scatter_plot(db,
-                      arguments,
-                      entityQuery,
-                      regex_str_ignore_item,
-                      scope_name,
-                      arguments["--xMetric"],
-                      arguments["--yMetric"],
-                      arguments["--ballMetric"],
-                      float(arguments["--ballSizeMin"]),
-                      float(arguments["--ballSizeMax"]),
-                      float(arguments["--ballSizeRate"]))
+    config = load_config(arguments["--config"])
+    if not isinstance(config, dict):
+        print ("Malformed config value.")
+        exit(1)
+    query_by_scope_name = {"file": arguments["--fileQuery"], "class": arguments["--classQuery"], "routine": arguments["--routineQuery"]}
+    regex_by_scope_name = {"file": arguments["--regexIgnoreFiles"], "class": arguments["--regexIgnoreClasses"], "routine": arguments["--regexIgnoreRoutines"]}
+    for scope_name, scope_configs in config.items():
+        if scope_name.lower() not in query_by_scope_name:
+            print("WARNING/SKIPPING:Unsupported scope %s" % scope_name)
+            continue
+        if not isinstance(scope_configs, list):
+            print("WARNING/SKIPPING: Malformed configs for scope %s" % scope_name)
+            continue
+        for scope_config in scope_configs:
+            if not isinstance(scope_config, dict):
+                print("WARNING/SKIPPING: Malformed config for scope %s" % scope_name)
+                continue
+            ok = scatter_plot(db,
+                          arguments,
+                          query_by_scope_name[scope_name.lower()],
+                          regex_by_scope_name[scope_name.lower()],
+                          scope_name,
+                          scope_config.get("xMetric", "CountLineCode"),
+                          scope_config.get("yMetric", "AvgCyclomaticModified"),
+                          scope_config.get("ballMetric", "MaxNesting"),
+                          float(scope_config.get("ballSizeMin", 40)),
+                          float(scope_config.get("ballSizeMax", 4000)),
+                          float(scope_config.get("ballSizeRate", 10)))
+            if not ok:
+                print("WARNING/SKIPPING: Could not create plot for scope %s with config %s" % (scope_name, scope_config))
+                continue
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
     print("Finished: %s" % str(end_time))
     print("Total: %s" % str(end_time - start_time))
     print("--------------------------------------------------")
     db.close()
-    if not ok:
-        sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
