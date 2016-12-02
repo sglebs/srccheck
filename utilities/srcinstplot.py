@@ -66,7 +66,7 @@ def scatter_plot (cmdline_arguments):
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code OO Instability Plot')
+    arguments = docopt(__doc__, version='Source Code OO Instability X Abstractness Plot')
     print("\r\n====== srcinstplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print("Processing %s" % arguments["--in"])
     scatter_plot(arguments)
