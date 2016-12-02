@@ -60,7 +60,16 @@ import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metrics, save_scatter
 
-def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, scope_name):
+def scatter_plot (db, cmdline_arguments,
+                  entityQuery,
+                  regex_str_ignore_item,
+                  scope_name,
+                  x_metric_name,
+                  y_metric_name,
+                  ball_metric_name,
+                  ball_size_min,
+                  ball_size_max,
+                  ball_size_rate):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     entities = db.ents(entityQuery)
@@ -69,15 +78,9 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
 
     annotations = []
     x_values = []
-    x_metric_name = cmdline_arguments["--xMetric"]
     y_values = []
-    y_metric_name = cmdline_arguments["--yMetric"]
     ball_values = []
     color_values = []
-    ball_size_min = float(cmdline_arguments["--ballSizeMin"])
-    ball_size_max = float(cmdline_arguments["--ballSizeMax"])
-    ball_size_rate = float(cmdline_arguments["--ballSizeRate"])
-    ball_metric_name = cmdline_arguments["--ballMetric"]
     metric_names = [x_metric_name, y_metric_name, ball_metric_name]
     for entity, container_file, metric_dict in stream_of_entity_with_metrics(entities, metric_names,
                                                                                      verbose, skipLibraries,
@@ -109,9 +112,9 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code Checker')
+    arguments = docopt(__doc__, version='Source Code Stats Scatter Plot')
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
-    print ("\r\n====== srcscatter by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print ("\r\n====== srcscatterplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)
     try:
         import understand
@@ -138,7 +141,17 @@ def main():
 
     print("Processing %s" % db.name())
     end_time = datetime.datetime.now()
-    ok = scatter_plot(db, arguments, entityQuery, regex_str_ignore_item, scope_name)
+    ok = scatter_plot(db,
+                      arguments,
+                      entityQuery,
+                      regex_str_ignore_item,
+                      scope_name,
+                      arguments["--xMetric"],
+                      arguments["--yMetric"],
+                      arguments["--ballMetric"],
+                      float(arguments["--ballSizeMin"]),
+                      float(arguments["--ballSizeMax"]),
+                      float(arguments["--ballSizeRate"]))
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
     print("Finished: %s" % str(end_time))
