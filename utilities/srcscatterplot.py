@@ -89,12 +89,12 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
         x_metric = metric_dict[x_metric_name]
         if x_metric is None:
             print("ERROR. Missing metric %s for X Axis" % x_metric)
-            return
+            return False
         x_values.append(x_metric)
         y_metric = metric_dict[y_metric_name]
         if y_metric is None:
             print("ERROR. Missing metric %s for Y Axis" % y_metric)
-            return
+            return False
         y_values.append(y_metric)
         ball_metric = metric_dict[ball_metric_name]
         if ball_metric is None:
@@ -104,7 +104,7 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
                              color_values, "directory", annotations, os.path.split(db.name())[-1], scope_name)
     print("Saved %s" % file_name)
-
+    return True
 
 
 def main():
@@ -138,13 +138,15 @@ def main():
 
     print("Processing %s" % db.name())
     end_time = datetime.datetime.now()
-    scatter_plot(db, arguments, entityQuery, regex_str_ignore_item, scope_name)
+    ok = scatter_plot(db, arguments, entityQuery, regex_str_ignore_item, scope_name)
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
     print("Finished: %s" % str(end_time))
     print("Total: %s" % str(end_time - start_time))
     print("--------------------------------------------------")
     db.close()
+    if not ok:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
