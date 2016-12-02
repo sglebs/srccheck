@@ -20,7 +20,7 @@ Options:
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse [default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
-  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved ~Predeclared,method ~Unknown ~Unresolved ~Predeclared,procedure ~Unknown ~Unresolved ~Predeclared,routine ~Unknown ~Unresolved ~Predeclared,classmethod ~Unknown ~Unresolved ~Predeclared]
+  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved ~Predeclared ~Abstract,method ~Unknown ~Unresolved ~Predeclared ~Abstract,procedure ~Unknown ~Unresolved ~Predeclared ~Abstract,routine ~Unknown ~Unresolved ~Predeclared ~Abstract,classmethod ~Unknown ~Unresolved ~Predeclared ~Abstract]
   --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
