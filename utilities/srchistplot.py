@@ -102,9 +102,9 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code Checker')
+    arguments = docopt(__doc__, version='Source Code Histogram Plot')
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
-    print ("\r\n====== srcplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print ("\r\n====== srchistplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)
     try:
         import understand
