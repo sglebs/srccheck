@@ -26,7 +26,7 @@ Options:
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse [default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
-  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved,method ~Unknown ~Unresolved,procedure ~Unknown ~Unresolved,routine ~Unknown ~Unresolved,classmethod ~Unknown ~Unresolved]
+  --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved ~Predeclared,method ~Unknown ~Unresolved ~Predeclared,procedure ~Unknown ~Unresolved ~Predeclared,routine ~Unknown ~Unresolved ~Predeclared,classmethod ~Unknown ~Unresolved ~Predeclared]
   --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
@@ -88,12 +88,12 @@ def scatter_plot (db, cmdline_arguments, entityQuery, regex_str_ignore_item, sco
         annotations.append(entity_name)
         x_metric = metric_dict[x_metric_name]
         if x_metric is None:
-            print("ERROR. Missing metric %s for X Axis" % x_metric)
+            print("ERROR. Missing metric %s for X Axis (entity=%s (%s), file=%s)" % (x_metric_name, entity.kindname(), entity_name, container_file))
             return False
         x_values.append(x_metric)
         y_metric = metric_dict[y_metric_name]
         if y_metric is None:
-            print("ERROR. Missing metric %s for Y Axis" % y_metric)
+            print("ERROR. Missing metric %s for Y Axis (entity=%s (%s), file=%s)" % (y_metric_name, entity.kindname(), entity_name, container_file))
             return False
         y_values.append(y_metric)
         ball_metric = metric_dict[ball_metric_name]
