@@ -228,7 +228,7 @@ multiple plots for each scope). Each config should have these keys (all optional
 Here's an example for Django sources:
 
 ```
-srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb --scope=Routine --xMetric=CountLineCode --yMetric=CyclomaticModified --ballMetric=MaxNesting
+srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb
 ```
 
 ![scatter plot for Django functions](example2-django.png)
