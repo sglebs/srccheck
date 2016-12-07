@@ -7,6 +7,39 @@ from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
 
+
+class ClickInfo(mpld3.plugins.PluginBase):
+    """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""
+
+    JAVASCRIPT = """
+    d3.selection.prototype.moveToBack = function() {
+        return this.each(function() {
+            var firstChild = this.parentNode.firstChild;
+            if (firstChild) {
+                this.parentNode.insertBefore(this, firstChild);
+            }
+        });
+    };
+    mpld3.register_plugin("clickinfo", ClickInfo);
+    ClickInfo.prototype = Object.create(mpld3.Plugin.prototype);
+    ClickInfo.prototype.constructor = ClickInfo;
+    ClickInfo.prototype.requiredProps = ["id"];
+    function ClickInfo(fig, props){
+        mpld3.Plugin.call(this, fig, props);
+    };
+
+    ClickInfo.prototype.draw = function(){
+        var obj = mpld3.get_element(this.props.id);
+        obj.elements().on("mousedown",
+                          function(d, i){d3.select(this).moveToBack();});
+    }
+    """
+
+    def __init__(self, points):
+        self.dict_ = {"type": "clickinfo",
+                      "id": mpld3.utils.get_id(points)}
+
+
 def stream_of_entity_with_metrics (entities, metrics, verbose, skipLibraries,regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files ):
     for entity in entities:
         library_name = entity.library()
@@ -120,6 +153,7 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
     tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
     mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
+    mpld3.plugins.connect(fig, ClickInfo(scatter))
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     mpld3.save_html(fig, filename)
     return filename
@@ -146,6 +180,7 @@ def save_abstractness_x_instability_scatter(x_values, x_label, y_values, y_label
     tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
     mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
+    mpld3.plugins.connect(fig, ClickInfo(scatter))
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     mpld3.save_html(fig, filename)
     return filename
