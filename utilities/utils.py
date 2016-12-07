@@ -119,6 +119,7 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
     plt.title("%i %s items. Circles: %s & %s" % (len(x_values), scope_name, ball_label, color_label))
     tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
+    mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     mpld3.save_html(fig, filename)
     return filename
@@ -144,6 +145,7 @@ def save_abstractness_x_instability_scatter(x_values, x_label, y_values, y_label
     plt.title("%i %s items. Circles: %s & %s" % (len(x_values), scope_name, ball_label, color_label))
     tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
     mpld3.plugins.connect(fig, tooltip)
+    mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
     mpld3.save_html(fig, filename)
     return filename

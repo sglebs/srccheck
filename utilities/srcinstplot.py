@@ -58,9 +58,8 @@ def scatter_plot (cmdline_arguments):
             instability = float(row.get(instabilityColumn,0))
             x_values.append(abstractness)
             y_values.append(instability)
-            annotations.append('<font color="DarkSlateBlue">%s<br />A=%f, I=%f <br /> %s=%i <br /> %s=%i</font>' % (
-                row[nameColumn], abstractness, instability,
-                sizeColumn, int(row.get(sizeColumn, 0)),
+            annotations.append('<font color="DarkSlateBlue">%s<br />%s=%i <br /> %s=%i</font>' % (
+                row[nameColumn], sizeColumn, int(row.get(sizeColumn, 0)),
                 complexityColumn, int(row.get(complexityColumn, 0))))
             ball_values.append(min(ball_size_max, ball_size_rate * int(row.get(sizeColumn,0)) + ball_size_min))
             color_values.append(int(row.get(complexityColumn,0)))
