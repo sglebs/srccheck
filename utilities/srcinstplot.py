@@ -54,11 +54,15 @@ def scatter_plot (cmdline_arguments):
     with open(inputCSV, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            annotations.append("%s<br />(%s=%i, %s=%i)" % (row[nameColumn],sizeColumn,int(row.get(sizeColumn,0)),complexityColumn, int(row.get(complexityColumn,0))))
-            x_values.append(float(row.get(abstractnessColumn,0)))
-            y_values.append(float(row.get(instabilityColumn,0)))
+            abstractness = float(row.get(abstractnessColumn,0))
+            instability = float(row.get(instabilityColumn,0))
+            x_values.append(abstractness)
+            y_values.append(instability)
+            annotations.append('<font color="DarkSlateBlue">%s<br />A=%f, I=%f <br /> %s=%i <br /> %s=%i</font>' % (
+                row[nameColumn], abstractness, instability,
+                sizeColumn, int(row.get(sizeColumn, 0)),
+                complexityColumn, int(row.get(complexityColumn, 0))))
             ball_values.append(min(ball_size_max, ball_size_rate * int(row.get(sizeColumn,0)) + ball_size_min))
-
             color_values.append(int(row.get(complexityColumn,0)))
     file_name = save_abstractness_x_instability_scatter(x_values, abstractnessColumn, y_values, instabilityColumn, ball_values, sizeColumn,
                                                         color_values, complexityColumn, annotations, os.path.split(inputCSV)[-1], "Component")
