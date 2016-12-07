@@ -26,6 +26,7 @@ Usage:
                 [--adaptive] \r\n \
                 [--logarithmic]  \r\n \
                 [--showMeanMedian]  \r\n \
+                [--showHighest]  \r\n \
                 [--histograms]
 
 
@@ -55,6 +56,7 @@ Options:
   -H, --histograms                              If you want srccheck to save histograms, just like srchistplot does
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
   -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
+  -s, --showHighest                             If you want to show (print) the highest valued elements (highest metric) even if not a violation. [default: false]
   --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
 
 Errors:
@@ -211,13 +213,14 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     max_value_found = metric_value
                     entity_with_max_value_found = entity
             if entity_with_max_value_found is not None:
-                print("...........................................")
-                kind = "violator"
-                if max_value_found <= max_allowed_value:
-                    kind = "non violator"
-                print("INFO: HIGHEST %s %s found (violation threshold is %s):\t" % (metric, kind, max_allowed_value), end="")
-                lambda_to_print(entity_with_max_value_found, metric, max_value_found, container_file=container_file) # prints the max found, which may be a violator or not
-                print("...........................................")
+                if bool(cmdline_arguments["--showHighest"]):
+                    print("...........................................")
+                    kind = "violator"
+                    if max_value_found <= max_allowed_value:
+                        kind = "non violator"
+                    print("INFO: HIGHEST %s %s found (violation threshold is %s):\t" % (metric, kind, max_allowed_value), end="")
+                    lambda_to_print(entity_with_max_value_found, metric, max_value_found, container_file=container_file) # prints the max found, which may be a violator or not
+                    print("...........................................")
             last_processed_metric = metric  # fix for #21, to reuse values
             last_all_values = all_values  # fix for #21, to reuse values
             last_max_value_found = max_value_found
@@ -254,9 +257,10 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                 violation_count = violation_count + 1
                 lambda_to_print(DummyEntity(), metric, stats_value)
             else:
-                print("...........................................")
-                print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
-                print("...........................................")
+                if bool(cmdline_arguments["--showHighest"]):
+                    print("...........................................")
+                    print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
+                    print("...........................................")
         if save_histograms and len(all_values) > 0 and lambda_stats is None:
             file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                        bool(cmdline_arguments["--logarithmic"]),
