@@ -20,15 +20,15 @@ class ClickSendToBack(mpld3.plugins.PluginBase):
             }
         });
     };
-    mpld3.register_plugin("clickinfo", ClickInfo);
-    ClickInfo.prototype = Object.create(mpld3.Plugin.prototype);
-    ClickInfo.prototype.constructor = ClickInfo;
-    ClickInfo.prototype.requiredProps = ["id"];
-    function ClickInfo(fig, props){
+    mpld3.register_plugin("clicksendtoback", ClickSendToBackPlugin);
+    ClickSendToBackPlugin.prototype = Object.create(mpld3.Plugin.prototype);
+    ClickSendToBackPlugin.prototype.constructor = ClickSendToBackPlugin;
+    ClickSendToBackPlugin.prototype.requiredProps = ["id"];
+    function ClickSendToBackPlugin(fig, props){
         mpld3.Plugin.call(this, fig, props);
     };
 
-    ClickInfo.prototype.draw = function(){
+    ClickSendToBackPlugin.prototype.draw = function(){
         var obj = mpld3.get_element(this.props.id);
         obj.elements().on("mousedown",
                           function(d, i){d3.select(this).moveToBack();});
@@ -36,7 +36,7 @@ class ClickSendToBack(mpld3.plugins.PluginBase):
     """
 
     def __init__(self, points):
-        self.dict_ = {"type": "clickinfo",
+        self.dict_ = {"type": "clicksendtoback",
                       "id": mpld3.utils.get_id(points)}
 
 
