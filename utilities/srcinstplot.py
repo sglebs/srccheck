@@ -34,6 +34,7 @@ import os
 import csv
 from docopt import docopt
 from utilities.utils import save_abstractness_x_instability_scatter
+from utilities import VERSION
 
 def scatter_plot (cmdline_arguments):
     inputCSV = cmdline_arguments["--in"]
@@ -66,7 +67,7 @@ def scatter_plot (cmdline_arguments):
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code OO Instability X Abstractness Plot')
+    arguments = docopt(__doc__, version=VERSION)
     print("\r\n====== srcinstplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print("Processing %s" % arguments["--in"])
     scatter_plot(arguments)

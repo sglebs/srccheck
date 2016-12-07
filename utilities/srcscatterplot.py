@@ -51,6 +51,7 @@ import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metrics, save_scatter
 import json
+from utilities import VERSION
 
 def load_config(config_json_or_path):
     if os.path.isfile(config_json_or_path):
@@ -118,7 +119,7 @@ def scatter_plot (db, cmdline_arguments,
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code Stats Scatter Plot')
+    arguments = docopt(__doc__, version=VERSION)
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
     print ("\r\n====== srcscatterplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)

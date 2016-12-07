@@ -90,6 +90,7 @@ import sys
 import requests
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv
+from utilities import VERSION
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -339,7 +340,7 @@ def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code Checker')
+    arguments = docopt(__doc__, version=VERSION)
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
     print ("\r\n====== srccheck by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)

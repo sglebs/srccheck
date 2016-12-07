@@ -57,6 +57,7 @@ import sys
 import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_histogram
+from utilities import VERSION
 
 
 def plot_hist_file_metrics (db, cmdline_arguments):
@@ -102,7 +103,7 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
 
 def main():
     start_time = datetime.datetime.now()
-    arguments = docopt(__doc__, version='Source Code Histogram Plot')
+    arguments = docopt(__doc__, version=VERSION)
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
     print ("\r\n====== srchistplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)
