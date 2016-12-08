@@ -6,6 +6,9 @@ setup(
     description='Source code KALOI (using Understand).',
     packages=find_packages(),
     version=VERSION,
+    url='https://github.com/sglebs/srccheck',
+    author='Marcio Marchini',
+    author_email='marcio@betterdeveloper.net',
     install_requires=[
         'docopt==0.6.2',
         'requests==2.10.0',
