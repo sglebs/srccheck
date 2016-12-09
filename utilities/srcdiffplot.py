@@ -15,6 +15,7 @@ Usage:
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--ballSize=<ballSize>] \r\n \
+                [--minChange=<minChange>] \r\n \
                 [--verbose]
 
 Options:
@@ -33,6 +34,7 @@ Options:
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
   --ballSize=<ballSize>                         Size of the ball (circles) in the plots [Default: 40]
+  --minChange=<minChange>                       Minimum change in metric value to be considered for the plot [Default: 1]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
 
 Errors:
@@ -141,14 +143,14 @@ def collect_values (before_after_by_entity_name, tag, metric_name):
         result.append(entity_props.get(tag, {}).get(metric_name, 0))
     return result
 
-def collect_values_that_changed (before_after_by_entity_name, tag_before, tag_after, metric_name):
+def collect_values_that_changed (before_after_by_entity_name, tag_before, tag_after, metric_name, minimal_change):
     results_before = []
     results_after = []
     names = []
     for entity_name, entity_props in before_after_by_entity_name.items():
         value_before = entity_props.get(tag_before, {}).get(metric_name, 0)
         value_after = entity_props.get(tag_after, {}).get(metric_name, 0)
-        if value_before != value_after:
+        if abs(value_before - value_after) >= minimal_change:
             results_before.append(value_before)
             results_after.append(value_after)
             names.append(entity_name)
@@ -162,7 +164,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
 
     metric_names = [metric.strip() for metric in metrics_as_string.split(",")]
     for i, metric_name in enumerate(metric_names):
-        all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name)
+        all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
             colors = ["r" if y > x else "g" for x,y in zip(all_before,all_after)]
             file_name = save_scatter(all_before, "Before",
