@@ -193,7 +193,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
         lambda_stats = None
-        if ":" in metric:
+        if metric.count(':') == 1: #fix for #42 - can have only 1 :
             lambda_name, adjusted_metric = metric.split(":")
             lambda_stats = STATS_LAMBDAS.get(lambda_name.upper().strip(), None)
 
