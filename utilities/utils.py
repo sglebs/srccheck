@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
 
-
 class ClickSendToBack(mpld3.plugins.PluginBase):
     """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""
 
@@ -146,19 +145,26 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
     return [filename, mean, median, pstdev]
 
 
-def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, color_label, annotations, filename_prefix, scope_name):
+def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, color_label, annotations, filename_prefix, scope_name, show_diagonal=False, format="html"):
     #plt.figure()  # new one, or they will be mixed
     fig, ax = plt.subplots()
-    scatter = ax.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title("%i %s items. Circles: %s & %s" % (len(x_values), scope_name, ball_label, color_label))
-    tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
-    mpld3.plugins.connect(fig, tooltip)
-    mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
-    mpld3.plugins.connect(fig, ClickSendToBack(scatter))
-    filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
-    mpld3.save_html(fig, filename)
+    if show_diagonal:
+        max_max = max(max(x_values), max(y_values))
+        ax.plot([0.0, max_max], [0.0, max_max], ls="--", lw=2, alpha=0.5,
+                color='green')  # http://matplotlib.org/api/lines_api.html
+    scatter = ax.scatter(x_values, y_values, ball_values, alpha=0.5, c=color_values)
+    filename = "%s-scatter-%s-%s_%s_%s.%s" % (filename_prefix, scope_name, x_label, y_label, ball_label, format)
+    if format == "html":
+        tooltip = mpld3.plugins.PointHTMLTooltip(scatter, labels=annotations)
+        mpld3.plugins.connect(fig, tooltip)
+        mpld3.plugins.connect(fig, mpld3.plugins.MousePosition())
+        mpld3.plugins.connect(fig, ClickSendToBack(scatter))
+        mpld3.save_html(fig, filename)
+    else:
+        plt.savefig(filename, dpi=72)
     return filename
 
 def save_abstractness_x_instability_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, color_label, annotations, filename_prefix, scope_name, show_diagonal=True):

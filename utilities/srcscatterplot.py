@@ -110,7 +110,7 @@ def scatter_plot (db, cmdline_arguments,
         if ball_metric is None:
             ball_metric = 0
         ball_values.append(min(ball_size_max,ball_size_rate * ball_metric + ball_size_min))
-        color_values.append(hash(os.path.dirname(container_file.longname())))
+        color_values.append(0 if container_file is None else hash(os.path.dirname(container_file.longname())))
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
                              color_values, "directory", annotations, os.path.split(db.name())[-1], scope_name)
     print("Saved %s" % file_name)
