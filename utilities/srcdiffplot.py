@@ -149,7 +149,9 @@ def collect_values_that_changed (before_after_by_entity_name, tag_before, tag_af
     names = []
     for entity_name, entity_props in before_after_by_entity_name.items():
         value_before = entity_props.get(tag_before, {}).get(metric_name, 0)
+        value_before = 0 if value_before is None else value_before
         value_after = entity_props.get(tag_after, {}).get(metric_name, 0)
+        value_after = 0 if value_after is None else value_after
         if abs(value_before - value_after) >= minimal_change:
             results_before.append(value_before)
             results_after.append(value_after)
