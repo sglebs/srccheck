@@ -14,6 +14,7 @@ Usage:
                 [--regexIgnoreFiles=<regexIgnoreFiles>] \r\n \
                 [--regexIgnoreClasses=<regexIgnoreClasses>] \r\n \
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
+                [--ballSize=<ballSize>] \r\n \
                 [--verbose]
 
 Options:
@@ -31,6 +32,7 @@ Options:
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
   --regexIgnoreRoutines=<regexIgnoreRoutines>   A regex to filter routines out
+  --ballSize=<ballSize>                         Size of the ball (circles) in the plots [Default: 40]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
 
 Errors:
@@ -165,7 +167,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
             colors = ["r" if y > x else "g" for x,y in zip(all_before,all_after)]
             file_name = save_scatter(all_before, "Before",
                                      all_after, "After",
-                                     40, metric_name,
+                                     int(cmdline_arguments["--ballSize"]), metric_name,
                                      colors, "Constant",
                                      entity_names,
                                      os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-" + metric_name,
