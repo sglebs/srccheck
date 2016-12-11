@@ -290,7 +290,9 @@ the ability to plot what changed from one version of your sofware to another, by
 at two different UDB files which represent the before & after states.
 
 The example below shows what changed in lines of code (CountLineCode) of methods
-from JUnit 4.9 to 4.12.
+from JUnit 4.9 to 4.12. If the metric increased, it will be in red and above the diagonal.
+If the metric decreased, it will be in green and below the diagonal. If you hover on
+the circles it will show the name of the element (not active below - it's just a screenshot).
 
 ![Diff plot for JUnit](example-diff.png)
 
