@@ -16,6 +16,7 @@ Usage:
                 [--regexIgnoreRoutines=<regexIgnoreRoutines>] \r\n \
                 [--ballSize=<ballSize>] \r\n \
                 [--minChange=<minChange>] \r\n \
+                [--showMeanMedian] \r\n \
                 [--verbose]
 
 Options:
@@ -36,6 +37,7 @@ Options:
   --ballSize=<ballSize>                         Size of the ball (circles) in the plots [Default: 40]
   --minChange=<minChange>                       Minimum change in metric value to be considered for the plot [Default: 1]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
+  -m, --showMeanMedian                          If you want to show circles for mean (blue), median (yellow), stdev (cyan) [default: false]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -56,6 +58,7 @@ import os
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metrics, save_scatter
 from utilities import VERSION
+import statistics
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
     plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
@@ -159,6 +162,27 @@ def collect_values_that_changed (before_after_by_entity_name, tag_before, tag_af
     return results_before, results_after, names
 
 
+def add_stats(all_before, all_after, entity_names, colors):
+    avg_before = statistics.mean(all_before)
+    avg_after = statistics.mean(all_after)
+    all_before.append(avg_before)
+    all_after.append(avg_after)
+    entity_names.append("(AVG)")
+    colors.append("b")
+    median_before = statistics.median(all_before)
+    median_after = statistics.median(all_after)
+    all_before.append(median_before)
+    all_after.append(median_after)
+    entity_names.append("(MEDIAN)")
+    colors.append("y")
+    stdev_before = statistics.pstdev(all_before,avg_before)
+    stdev_after = statistics.pstdev(all_after,avg_after)
+    all_before.append(stdev_before)
+    all_after.append(stdev_after)
+    entity_names.append("(STDEV)")
+    colors.append("c")
+
+
 def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_as_string, entityQuery, regex_str_ignore_item, scope_name):
     before_after_by_entity_name = compute_metrics_before_after(db_before, db_after, cmdline_arguments,
                                                                metrics_as_string, entityQuery, regex_str_ignore_item,
@@ -169,10 +193,12 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
         all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
             colors = ["r" if y > x else "g" for x,y in zip(all_before,all_after)]
+            if bool(cmdline_arguments["--showMeanMedian"]):
+                add_stats(all_before, all_after, entity_names, colors)
             file_name = save_scatter(all_before, "Before",
                                      all_after, "After",
                                      int(cmdline_arguments["--ballSize"]), metric_name,
-                                     colors, "Constant",
+                                     colors, "Increased/Decreased",
                                      entity_names,
                                      os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-" + metric_name,
                                      scope_name,
