@@ -279,4 +279,43 @@ We also have a tool that generates such CSV files from an Understand UDB file, b
 Feel free to contact us if you would like to use it.
  
  
- 
+Diff Plots
+==========
+"How do projects get late? One day at a time!" https://en.wikipedia.org/wiki/The_Mythical_Man-Month
+
+And how do projects become legacies and a big ball of mud? One commit at a time!
+
+In order to help you keep an eye on what changed from one version to another, we added
+the ability to plot what changed from one version of your sofware to another, by pointing
+at two different UDB files which represent the before & after states.
+
+The example below shows what changed in lines of code (CountLineCode) of methods
+from JUnit 4.9 to 4.12.
+
+![Diff plot for JUnit](example-diff.png)
+
+The plot was generated like this:
+
+```
+srcdiffplot --before=junit-before.udb --after=junit-after.udb --dllDir=/Applications/Understand.app/Contents/MacOS/Python --ballSize=200 --minChange=2
+```
+
+If you run *srcdiffplot* with -h it will show you all the parameters.
+
+In order to generate different UDBs from different git tags, you can do this:
+
+```
+mkdir tmp
+cd tmp
+git clone https://github.com/junit-team/junit.git
+cd junit
+git checkout tags/r4.9
+und create -languages java ../before.udb
+und add ./src/main/java/junit ../before.udb
+und analyze ../before.udb
+git checkout tags/r4.12
+und create -languages java ../after.udb
+und add ./src/main/java/junit ../after.udb
+und analyze ../after.udb
+```
+
