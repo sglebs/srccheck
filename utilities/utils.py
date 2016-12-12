@@ -131,7 +131,7 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
             mean = statistics.mean(metric_values_as_list) if mean is None else mean
             plt.axvline(mean, color='b', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="round")
             median = statistics.median(metric_values_as_list) if median is None else median
-            plt.axvline(median, color='r', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
+            plt.axvline(median, color='y', linestyle='dashed', linewidth=3, alpha=0.8, dash_capstyle="butt")
             pstdev = statistics.pstdev(metric_values_as_list, mean) if pstdev is None else pstdev
             plt.xlabel(
                 "%s   (avg=%3.2f, median=%3.2f, stdev=%3.2f, max=%3.2f)" % (metric, mean, median, pstdev, max_value))
