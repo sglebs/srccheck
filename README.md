@@ -321,3 +321,6 @@ und add ./src/main/java/junit ../after.udb
 und analyze ../after.udb
 ```
 
+Special Thanks
+==============
+We would like to thank [Softplan](http://www.softplan.com.br) and [Nexxera](http://www.nexxera.com) for their partial support of the development of these utilities. 
