@@ -240,11 +240,11 @@ def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, fi
     if min_vals is None:
         min_vals = [0.001] * len(values) # ComplexRadar cannot plot zero
     ranges = [(x,y) for x,y in zip (min_vals, max_vals)]
-    fig1 = plt.figure(figsize=(9, 9))
-    radar = ComplexRadar(fig1, labels, ranges)
+    fig1 = plt.figure(figsize=(12, 12))
+    radar = ComplexRadar(fig1, labels, ranges, precision=1)
     radar.plot(threshold_values, color="green", label="limits")
     radar.fill(threshold_values, color="green", alpha=0.5)
-    radar = ComplexRadar(fig1, labels, ranges)
+    radar = ComplexRadar(fig1, labels, ranges, precision=1)
     radar.plot(values, color="orangered", label="current")
     radar.fill(values, color="orangered", alpha=0.5)
     radar.ax.legend(loc='upper center', bbox_to_anchor=(0.9, 1.10),
@@ -252,5 +252,4 @@ def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, fi
     if title is not None:
         plt.title(title)
     plt.savefig(file_name, dpi=72)
-    print("Saved %s" % file_name)
     return file_name

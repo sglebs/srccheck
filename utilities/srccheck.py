@@ -314,7 +314,7 @@ def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, filename_pre
     all_max_values = []
     all_thresholds = []
     for metric_name in sorted(tracked_metrics.keys()):
-        all_labels.append(metric_name)
+        all_labels.append(metric_name.replace(" ", "\n"))
         all_values.append(max(0.001,tracked_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
         all_max_values.append(max(tracked_metrics[metric_name], max_metrics[metric_name], 0.5)) # our kiviat lib cannot plot variables <= 0
         all_thresholds.append(max(0.001,max_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
