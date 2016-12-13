@@ -53,21 +53,24 @@ Author:
 """
 
 import datetime
-import sys
 import os
-from docopt import docopt
-from utilities.utils import stream_of_entity_with_metrics, save_scatter
-from utilities import VERSION
 import statistics
+import sys
+
+from docopt import docopt
+
+from utilities import VERSION
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat
+
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
-    plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
+    return plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--fileMetrics"], cmdline_arguments["--fileQuery"], cmdline_arguments.get("--regexIgnoreFiles", None), "File")
 
 def plot_diff_class_metrics (db_before, db_after, cmdline_arguments):
-    plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--classMetrics"], cmdline_arguments["--classQuery"], cmdline_arguments.get("--regexIgnoreClasses", None), "Class")
+    return plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--classMetrics"], cmdline_arguments["--classQuery"], cmdline_arguments.get("--regexIgnoreClasses", None), "Class")
 
 def plot_diff_routine_metrics (db_before, db_after, cmdline_arguments):
-    plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--routineMetrics"], cmdline_arguments["--routineQuery"], cmdline_arguments.get("--regexIgnoreRoutines", None), "Routine")
+    return plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--routineMetrics"], cmdline_arguments["--routineQuery"], cmdline_arguments.get("--regexIgnoreRoutines", None), "Routine")
 
 
 def prune_unchanged (before_after, diff_tag):
@@ -189,6 +192,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
                                                                scope_name)
 
     metric_names = [metric.strip() for metric in metrics_as_string.split(",")]
+    sum_of_diffs_per_metric = []
     for i, metric_name in enumerate(metric_names):
         all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
@@ -205,6 +209,17 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
                                      show_diagonal=True,
                                      format="html")
             print("Saved %s" % file_name)
+        sum_before = sum(all_before)
+        sum_after = sum (all_after)
+        sum_of_diffs_per_metric.append(sum_after - sum_before)
+
+    return [metric_names, sum_of_diffs_per_metric]
+    # fig1 = plt.figure(figsize=(6, 6))
+    # max_range = (min(sum_of_diffs_per_metric), max(sum_of_diffs_per_metric))
+    # radar = ComplexRadar(fig1, metric_names, [max_range for i in range(len(metric_names))])
+    # radar.plot(sum_of_diffs_per_metric)
+    # radar.fill(sum_of_diffs_per_metric, alpha=0.2)
+    # plt.show()
 
 
 def main():
@@ -231,9 +246,24 @@ def main():
         sys.exit(-2)
 
     print("Processing %s and %s" % (db_before.name(), db_after.name()))
-    plot_diff_file_metrics(db_before, db_after, arguments)
-    plot_diff_class_metrics(db_before, db_after, arguments)
-    plot_diff_routine_metrics(db_before, db_after, arguments)
+    all_metric_names = []
+    all_metric_values = []
+
+    metric_names, metric_diffs = plot_diff_file_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["File:" + name for name in metric_names])
+    all_metric_values.extend(metric_diffs)
+
+    metric_names, metric_diffs = plot_diff_class_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["Class:" + name for name in metric_names])
+    all_metric_values.extend(metric_diffs)
+
+    metric_names, metric_diffs = plot_diff_routine_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["Routine:" + name for name in metric_names])
+    all_metric_values.extend(metric_diffs)
+
+    file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-kiviat.png"
+    save_kiviat(all_metric_names, all_metric_values, file_name, "Sum of deltas of all metrics")
+
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
