@@ -262,7 +262,7 @@ def main():
     all_metric_values.extend(metric_diffs)
 
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-kiviat.png"
-    save_kiviat(all_metric_names, all_metric_values, file_name, "Sum of deltas of all metrics")
+    #save_kiviat(all_metric_names, all_metric_values, file_name, "Sum of deltas of all metrics")
 
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
