@@ -332,7 +332,7 @@ def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
     for metric, value in cur_tracked_metrics.items():
         rest_params = {}
         rest_params["resource"] = sonar_prj
-        rest_params["metric"] = metric.lower().replace(" ", "_") # SONAR wants its key, which is lowercase
+        rest_params["metric"] = metric.lower().replace(" ", "_").replace(":", "_") # SONAR wants its key, which is lowercase. get rid of stats special char :
         rest_params["val"] = value
         try:
             response = requests.post(sonar_url, rest_params, timeout=TIMEOUT, auth=(sonar_user, sonar_pass))
