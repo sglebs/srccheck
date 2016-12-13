@@ -23,6 +23,13 @@ Beyond that, you can keep a trend dashboard of your metrics over time. For that,
 and its [Plot Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Plot+Plugin) installed as well. srccheck can
 generate the CSV file that this plugin requires (see our --outputCSV= command-line parameter).
 
+For a radial (kiviat) view of the current values and the max values of the metrics, the script also outputs a png
+with the same name as the CSV file (just different file extension). Here is an example:
+
+![Kivit of current values and max values](example-kiviat.png)
+
+If the green values are higher, you are ok. If the orange values are higher, you blew past the maximum allowed value for the metric.
+
 If you want to publish some metrics as a dashboard in SONAR, you can also do it. For that, you must first
 register Manual Measures in SONAR, and srccheck will use this [Manual Measures API](http://docs.codehaus.org/pages/viewpage.action?pageId=229743270).
 The steps are:
