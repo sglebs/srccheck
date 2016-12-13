@@ -34,7 +34,8 @@ class ComplexRadar():
                 label = "axes{}".format(i))
                 for i in range(len(variables))]
         l, text = axes[0].set_thetagrids(angles,
-                                         labels=variables)
+                                         labels=variables,
+                                         frac=1.11)
         [txt.set_rotation(angle-90) for txt, angle
              in zip(text, angles)]
         for ax in axes[1:]:
