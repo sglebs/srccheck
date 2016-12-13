@@ -89,7 +89,7 @@ import sys
 
 import requests
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv
+from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv, save_kiviat_with_values_and_thresholds
 from utilities import VERSION
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
@@ -153,7 +153,7 @@ def process_prj_metrics (cmdline_arguments, prj_metrics):
             if cur_value > max_value:
                 _print_metric_violation (metric, cur_value, max_value)
                 violation_count = violation_count + 1
-    return [violation_count, max_metrics_found]
+    return [violation_count, max_metrics_found, max_metrics]
 
 def metric_name_for_sorting(metric_name):
     if ":" not in metric_name:
@@ -275,7 +275,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
             if verbose:
                 print("Saved %s" % file_name)
 
-    return [violation_count, highest_values_found_by_metric]
+    return [violation_count, highest_values_found_by_metric, max_values_allowed_by_metric]
 
 
 def load_metrics_thresholds(max_metrics_json_or_path):
@@ -306,6 +306,18 @@ def process_routine_metrics (db, cmdline_arguments):
 def append_dict_with_key_prefix (dict_to_grow, dict_to_append, prefix):
     for k,v in dict_to_append.items():
         dict_to_grow["%s %s" % (prefix, k)] = v
+
+def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments):
+    all_labels = []
+    all_values = []
+    all_max_values = []
+    all_thresholds = []
+    for metric_name in sorted(tracked_metrics.keys()):
+        all_labels.append(metric_name)
+        all_values.append(max(0.001,tracked_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
+        all_max_values.append(max(tracked_metrics[metric_name], max_metrics[metric_name], 0.5)) # our kiviat lib cannot plot variables <= 0
+        all_thresholds.append(max(0.001,max_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
+    return save_kiviat_with_values_and_thresholds(all_labels, all_values, all_thresholds, arguments["--outputCSV"].replace("csv","png"), None, max_vals = all_max_values)
 
 
 def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
@@ -362,24 +374,24 @@ def main():
     print_prj_metrics(prj_metrics)
     print ("")
     print ("\r\n====== Project Metrics that failed the filters  ===========")
-    [total_violation_count , prj_tracked_metrics] = process_prj_metrics(arguments, prj_metrics)
+    [total_violation_count , prj_tracked_metrics, prj_max_metrics ] = process_prj_metrics(arguments, prj_metrics)
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxPrjMetrics", False), prj_tracked_metrics)
     print ("")
     print ("\r\n====== File Metrics that failed the filters  ===========")
-    [violation_count, file_tracked_metrics] = process_file_metrics(db, arguments)
+    [violation_count, file_tracked_metrics, file_max_metrics ] = process_file_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxFileMetrics"), file_tracked_metrics)
     print ("")
     print ("\r\n====== Class Metrics that failed the filters  ==========")
-    [violation_count, class_tracked_metrics] = process_class_metrics(db, arguments)
+    [violation_count, class_tracked_metrics, class_max_metrics ] = process_class_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxClassMetrics"), class_tracked_metrics)
     print ("")
     print ("\r\n====== Routine Metrics that failed the filters ==========")
-    [violation_count, routine_tracked_metrics] = process_routine_metrics(db, arguments)
+    [violation_count, routine_tracked_metrics, routine_max_metrics ] = process_routine_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxRoutineMetrics"), routine_tracked_metrics)
@@ -390,6 +402,14 @@ def main():
     append_dict_with_key_prefix (tracked_metrics, file_tracked_metrics, "File")
     append_dict_with_key_prefix (tracked_metrics, class_tracked_metrics, "Class")
     append_dict_with_key_prefix (tracked_metrics, routine_tracked_metrics, "Routine")
+    max_metrics = {}
+    append_dict_with_key_prefix (max_metrics, prj_max_metrics, "Prj")
+    append_dict_with_key_prefix (max_metrics, file_max_metrics, "File")
+    append_dict_with_key_prefix (max_metrics, class_max_metrics, "Class")
+    append_dict_with_key_prefix (max_metrics, routine_max_metrics, "Routine")
+
+    file_name = save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments)
+    print("Kiviat saved to %s"% file_name)
     csv_ok = save_csv(arguments["--outputCSV"], tracked_metrics)
     if csv_ok:
         print("+++ Metrics saved to %s" % arguments["--outputCSV"])

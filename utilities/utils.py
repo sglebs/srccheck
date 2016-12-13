@@ -6,6 +6,8 @@ backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other 
 from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
+from utilities.radar import _radar_factory
+from utilities.complex_radar import ComplexRadar
 
 class ClickSendToBack(mpld3.plugins.PluginBase):
     """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""
@@ -213,3 +215,42 @@ def save_csv (csv_path, cur_tracked_metrics_for_csv):
         return True
     except:
         return False
+
+
+def save_kiviat (labels, values, file_name, title, max_vals = None):
+    theta = _radar_factory(len(labels))
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection='radar')
+    #ax.plot(theta, values, color='k')
+    if max_vals is None:
+        max_vals = [max(values)] * len(values)
+    ax.plot(theta, max_vals, color='k')
+    ax.fill(theta, max_vals, facecolor='deepskyblue', alpha=0.25) # background
+    ax.plot(theta, values, color='r')
+    ax.fill(theta, values, facecolor='r', alpha=0.25)
+    ax.set_varlabels(labels)
+    plt.title(title)
+    plt.savefig(file_name, dpi=72)
+    print("Saved %s" % file_name)
+    return file_name
+
+def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, file_name, title=None, max_vals = None, min_vals = None):
+    if max_vals is None:
+        max_vals = [max(v,t,0.001) for v,t in zip(values,threshold_values)]
+    if min_vals is None:
+        min_vals = [0.001] * len(values) # ComplexRadar cannot plot zero
+    ranges = [(x,y) for x,y in zip (min_vals, max_vals)]
+    fig1 = plt.figure(figsize=(9, 9))
+    radar = ComplexRadar(fig1, labels, ranges)
+    radar.plot(threshold_values, color="green", label="limits")
+    radar.fill(threshold_values, color="green", alpha=0.5)
+    radar = ComplexRadar(fig1, labels, ranges)
+    radar.plot(values, color="orangered", label="current")
+    radar.fill(values, color="orangered", alpha=0.5)
+    radar.ax.legend(loc='upper center', bbox_to_anchor=(0.9, 1.10),
+                    fancybox=False, shadow=False, ncol=48)
+    if title is not None:
+        plt.title(title)
+    plt.savefig(file_name, dpi=72)
+    print("Saved %s" % file_name)
+    return file_name
