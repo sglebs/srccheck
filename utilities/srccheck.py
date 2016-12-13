@@ -307,7 +307,8 @@ def append_dict_with_key_prefix (dict_to_grow, dict_to_append, prefix):
     for k,v in dict_to_append.items():
         dict_to_grow["%s %s" % (prefix, k)] = v
 
-def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments):
+def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, filename_prefix):
+    filename = "%s-kiviat.png" % filename_prefix
     all_labels = []
     all_values = []
     all_max_values = []
@@ -317,7 +318,7 @@ def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments):
         all_values.append(max(0.001,tracked_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
         all_max_values.append(max(tracked_metrics[metric_name], max_metrics[metric_name], 0.5)) # our kiviat lib cannot plot variables <= 0
         all_thresholds.append(max(0.001,max_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
-    return save_kiviat_with_values_and_thresholds(all_labels, all_values, all_thresholds, arguments["--outputCSV"].replace("csv","png"), None, max_vals = all_max_values)
+    return save_kiviat_with_values_and_thresholds(all_labels, all_values, all_thresholds, filename, None, max_vals = all_max_values)
 
 
 def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):
@@ -408,7 +409,7 @@ def main():
     append_dict_with_key_prefix (max_metrics, class_max_metrics, "Class")
     append_dict_with_key_prefix (max_metrics, routine_max_metrics, "Routine")
 
-    file_name = save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments)
+    file_name = save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, os.path.split(db.name())[-1])
     print("Kiviat saved to %s"% file_name)
     csv_ok = save_csv(arguments["--outputCSV"], tracked_metrics)
     if csv_ok:

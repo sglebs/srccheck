@@ -24,7 +24,7 @@ and its [Plot Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Plot+Plugin) i
 generate the CSV file that this plugin requires (see our --outputCSV= command-line parameter).
 
 For a radial (kiviat) view of the current values and the max values of the metrics, the script also outputs a png
-with the same name as the CSV file (just different file extension). Here is an example:
+with the same name as the UDB file (just different file extension). Here is an example:
 
 ![Kivit of current values and max values](example-kiviat.png)
 
