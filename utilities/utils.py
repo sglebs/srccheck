@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
 from utilities.radar import _radar_factory
-from utilities.complex_radar import ComplexRadar
+from utilities.complex_radar import ComplexRadar, RADAR_SMALLEST_VALUE_ALLOWED
 
 class ClickSendToBack(mpld3.plugins.PluginBase):
     """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""
@@ -236,9 +236,9 @@ def save_kiviat (labels, values, file_name, title, max_vals = None):
 
 def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, file_name, title=None, max_vals = None, min_vals = None):
     if max_vals is None:
-        max_vals = [max(v,t,0.001) for v,t in zip(values,threshold_values)]
+        max_vals = [max(v, t, RADAR_SMALLEST_VALUE_ALLOWED) for v, t in zip(values, threshold_values)]
     if min_vals is None:
-        min_vals = [0.001] * len(values) # ComplexRadar cannot plot zero
+        min_vals = [RADAR_SMALLEST_VALUE_ALLOWED] * len(values) # ComplexRadar cannot plot zero
     ranges = [(x,y) for x,y in zip (min_vals, max_vals)]
     fig1 = plt.figure(figsize=(12, 12))
     radar = ComplexRadar(fig1, labels, ranges, precision=1)

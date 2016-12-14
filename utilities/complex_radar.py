@@ -1,6 +1,8 @@
 # source from http://stackoverflow.com/questions/38263313/radial-grids-must-be-strictly-positive-error-on-radar-chart
 import numpy as np
 
+RADAR_SMALLEST_VALUE_ALLOWED = 0.001
+
 def _invert(x, limits):
     """inverts a value x on a scale from
     limits[0] to limits[1]"""
