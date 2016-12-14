@@ -91,7 +91,6 @@ import requests
 from docopt import docopt
 from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv, save_kiviat_with_values_and_thresholds
 from utilities import VERSION
-from utilities.complex_radar import RADAR_SMALLEST_VALUE_ALLOWED
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -314,12 +313,13 @@ def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, filename_pre
     all_values = []
     all_max_values = []
     all_thresholds = []
+    min_vals = [0 for i in range(len(tracked_metrics))]
     for metric_name in sorted(tracked_metrics.keys()):
         all_labels.append(metric_name.replace(" ", "\n"))
-        all_values.append(max(RADAR_SMALLEST_VALUE_ALLOWED, tracked_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
-        all_max_values.append(max(tracked_metrics[metric_name], max_metrics[metric_name], 5 * RADAR_SMALLEST_VALUE_ALLOWED)) # our kiviat lib cannot plot variables <= 0
-        all_thresholds.append(max(RADAR_SMALLEST_VALUE_ALLOWED, max_metrics[metric_name])) # our kiviat lib cannot plot variables <= 0
-    return save_kiviat_with_values_and_thresholds(all_labels, all_values, all_thresholds, filename, None, max_vals = all_max_values)
+        all_values.append(tracked_metrics[metric_name])
+        all_max_values.append(max(tracked_metrics[metric_name], max_metrics[metric_name], 0.001)) # make sure the range is never 0...0, or we get Divide by Zero. Max has to be > 0
+        all_thresholds.append(max_metrics[metric_name])
+    return save_kiviat_with_values_and_thresholds(all_labels, all_values, all_thresholds, filename, None, max_vals = all_max_values, min_vals=min_vals)
 
 
 def _post_to_sonar (cmdline_arguments, cur_tracked_metrics):

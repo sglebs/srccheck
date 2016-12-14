@@ -60,7 +60,7 @@ import sys
 from docopt import docopt
 
 from utilities import VERSION
-from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds
 
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
@@ -193,6 +193,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
 
     metric_names = [metric.strip() for metric in metrics_as_string.split(",")]
     sum_of_diffs_per_metric = []
+    count_elements_in_diff = 0
     for i, metric_name in enumerate(metric_names):
         all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
@@ -212,14 +213,9 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
         sum_before = sum(all_before)
         sum_after = sum (all_after)
         sum_of_diffs_per_metric.append(sum_after - sum_before)
+        count_elements_in_diff = count_elements_in_diff+ len(all_before)
 
-    return [metric_names, sum_of_diffs_per_metric]
-    # fig1 = plt.figure(figsize=(6, 6))
-    # max_range = (min(sum_of_diffs_per_metric), max(sum_of_diffs_per_metric))
-    # radar = ComplexRadar(fig1, metric_names, [max_range for i in range(len(metric_names))])
-    # radar.plot(sum_of_diffs_per_metric)
-    # radar.fill(sum_of_diffs_per_metric, alpha=0.2)
-    # plt.show()
+    return [metric_names, sum_of_diffs_per_metric, count_elements_in_diff]
 
 
 def main():
@@ -248,21 +244,25 @@ def main():
     print("Processing %s and %s" % (db_before.name(), db_after.name()))
     all_metric_names = []
     all_metric_values = []
+    all_thresholds = []
 
-    metric_names, metric_diffs = plot_diff_file_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["File:" + name for name in metric_names])
+    metric_names, metric_diffs, count_elements_in_diff = plot_diff_file_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["File\n" + name for name in metric_names])
     all_metric_values.extend(metric_diffs)
+    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
 
-    metric_names, metric_diffs = plot_diff_class_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["Class:" + name for name in metric_names])
+    metric_names, metric_diffs, count_elements_in_diff = plot_diff_class_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["Class\n" + name for name in metric_names])
     all_metric_values.extend(metric_diffs)
+    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
 
-    metric_names, metric_diffs = plot_diff_routine_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["Routine:" + name for name in metric_names])
+    metric_names, metric_diffs, count_elements_in_diff = plot_diff_routine_metrics(db_before, db_after, arguments)
+    all_metric_names.extend(["Routine\n" + name for name in metric_names])
     all_metric_values.extend(metric_diffs)
+    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
 
-    file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-kiviat.png"
-    #save_kiviat(all_metric_names, all_metric_values, file_name, "Sum of deltas of all metrics")
+    file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
+    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "sum of deltas")
 
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")

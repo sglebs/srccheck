@@ -6,8 +6,7 @@ backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other 
 from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
-from utilities.radar import _radar_factory
-from utilities.complex_radar import ComplexRadar, RADAR_SMALLEST_VALUE_ALLOWED
+from utilities.complex_radar import ComplexRadar
 
 class ClickSendToBack(mpld3.plugins.PluginBase):
     """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""
@@ -217,28 +216,11 @@ def save_csv (csv_path, cur_tracked_metrics_for_csv):
         return False
 
 
-def save_kiviat (labels, values, file_name, title, max_vals = None):
-    theta = _radar_factory(len(labels))
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1, projection='radar')
-    #ax.plot(theta, values, color='k')
-    if max_vals is None:
-        max_vals = [max(values)] * len(values)
-    ax.plot(theta, max_vals, color='k')
-    ax.fill(theta, max_vals, facecolor='deepskyblue', alpha=0.25) # background
-    ax.plot(theta, values, color='r')
-    ax.fill(theta, values, facecolor='r', alpha=0.25)
-    ax.set_varlabels(labels)
-    plt.title(title)
-    plt.savefig(file_name, dpi=72)
-    print("Saved %s" % file_name)
-    return file_name
-
 def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, file_name, title=None, max_vals = None, min_vals = None):
     if max_vals is None:
-        max_vals = [max(v, t, RADAR_SMALLEST_VALUE_ALLOWED) for v, t in zip(values, threshold_values)]
+        max_vals = [max(v, t) for v, t in zip(values, threshold_values)]
     if min_vals is None:
-        min_vals = [RADAR_SMALLEST_VALUE_ALLOWED] * len(values) # ComplexRadar cannot plot zero
+        min_vals = [min(v, t, v/2) for v, t in zip(values, threshold_values)]
     ranges = [(x,y) for x,y in zip (min_vals, max_vals)]
     fig1 = plt.figure(figsize=(12, 12))
     radar = ComplexRadar(fig1, labels, ranges, precision=1)
