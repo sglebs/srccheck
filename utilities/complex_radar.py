@@ -27,7 +27,7 @@ def _scale_data(data, ranges):
 
 class ComplexRadar():
     def __init__(self, fig, variables, ranges,
-                 n_ordinate_levels=6, precision=2, textsize="smaller", textposrate=1.11, textposrotation=60):
+                 n_ordinate_levels=6, precision=2, textsize="smaller", numberssize="smaller", textposrate=1.11, textposrotation=60):
         angles = np.arange(0, 360, 360./len(variables))
 
         axes = [fig.add_axes([0.1,0.1,0.8,0.8],polar=True,
@@ -52,7 +52,7 @@ class ComplexRadar():
                           # gridlabels aren't reversed
             gridlabel[0] = "" # clean up origin
             ax.set_rgrids(grid, labels=gridlabel,
-                         angle=angles[i], size=textsize)
+                         angle=angles[i], size=numberssize)
             #ax.spines["polar"].set_visible(False)
             ax.set_ylim(*ranges[i])
         # variables for plotting
