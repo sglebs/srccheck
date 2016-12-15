@@ -1,4 +1,4 @@
-# source from http://stackoverflow.com/questions/38263313/radial-grids-must-be-strictly-positive-error-on-radar-chart
+# Based on source from http://stackoverflow.com/questions/38263313/radial-grids-must-be-strictly-positive-error-on-radar-chart
 import numpy as np
 
 AX_MIN_VALUE = 0.1
@@ -14,8 +14,7 @@ def _scale_data(data, ranges):
     result = []
     for d, (y1, y2) in zip(data, ranges):
         assert (y1 <= d <= y2) or (y2 <= d <= y1)
-        new_date = (d-y1)/(y2-y1)*(AX_MAX_VALUE-AX_MIN_VALUE) + AX_MIN_VALUE # This is the formula to convert between 2 scales
-        result.append(new_date)
+        result.append((d-y1)/(y2-y1)*(AX_MAX_VALUE-AX_MIN_VALUE) + AX_MIN_VALUE) # This is the formula to convert between 2 scales
     return result
 
 class ComplexRadar():
