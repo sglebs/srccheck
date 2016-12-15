@@ -232,6 +232,6 @@ def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, fi
     radar.ax.legend(loc='upper center', bbox_to_anchor=(0.9, 1.10),
                     fancybox=False, shadow=False, ncol=48)
     if title is not None:
-        plt.title(title)
+        plt.title(title, y=1.08)
     plt.savefig(file_name, dpi=72)
     return file_name
