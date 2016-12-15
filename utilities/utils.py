@@ -217,10 +217,10 @@ def save_csv (csv_path, cur_tracked_metrics_for_csv):
 
 
 def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, file_name, title=None, max_vals = None, min_vals = None):
-    if max_vals is None:
-        max_vals = [max(v, t) for v, t in zip(values, threshold_values)]
     if min_vals is None:
         min_vals = [min(v, t, v/2) for v, t in zip(values, threshold_values)]
+    if max_vals is None:
+        max_vals = [max(v, t, m + 0.001) for v, t, m in zip(values, threshold_values, min_vals)] #minimum plus 0.001 to prevent DivideBy Zero when max=min, bug #53
     ranges = [(x,y) for x,y in zip (min_vals, max_vals)]
     fig1 = plt.figure(figsize=(12, 12))
     radar = ComplexRadar(fig1, labels, ranges, precision=1)
