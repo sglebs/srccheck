@@ -192,8 +192,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
                                                                scope_name)
 
     metric_names = [metric.strip() for metric in metrics_as_string.split(",")]
-    sum_of_diffs_per_metric = []
-    count_elements_in_diff = 0
+    result={}
     for i, metric_name in enumerate(metric_names):
         all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
@@ -212,10 +211,8 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
             print("Saved %s" % file_name)
         sum_before = sum(all_before)
         sum_after = sum (all_after)
-        sum_of_diffs_per_metric.append(sum_after - sum_before)
-        count_elements_in_diff = count_elements_in_diff+ len(all_before)
-
-    return [metric_names, sum_of_diffs_per_metric, count_elements_in_diff]
+        result[metric_name] = {"sum_before": sum_before, "sum_after": sum_after, "element_count": len(all_before)}
+    return result
 
 
 def main():
@@ -246,23 +243,15 @@ def main():
     all_metric_values = []
     all_thresholds = []
 
-    metric_names, metric_diffs, count_elements_in_diff = plot_diff_file_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["File\n" + name for name in metric_names])
-    all_metric_values.extend(metric_diffs)
-    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
-
-    metric_names, metric_diffs, count_elements_in_diff = plot_diff_class_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["Class\n" + name for name in metric_names])
-    all_metric_values.extend(metric_diffs)
-    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
-
-    metric_names, metric_diffs, count_elements_in_diff = plot_diff_routine_metrics(db_before, db_after, arguments)
-    all_metric_names.extend(["Routine\n" + name for name in metric_names])
-    all_metric_values.extend(metric_diffs)
-    all_thresholds.extend([count_elements_in_diff * int(arguments["--minChange"]) for i in range(len(metric_names))])
+    for plot_lambda, scope in [(plot_diff_file_metrics, "File"), (plot_diff_class_metrics, "Class"), (plot_diff_routine_metrics, "Routine")]:
+        data_by_metric_name = plot_lambda(db_before, db_after, arguments)
+        for metric_name in sorted(data_by_metric_name.keys()):
+            all_metric_names.append("%s\n%s" % (scope, metric_name))
+            all_metric_values.append(data_by_metric_name[metric_name]["sum_after"])
+            all_thresholds.append(data_by_metric_name[metric_name]["sum_before"])
 
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
-    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "sum of deltas")
+    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "Sum of Metrics (Changed Elements)", thresholdslabel="before", valueslabel="after")
 
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
