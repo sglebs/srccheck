@@ -328,6 +328,10 @@ und add ./src/main/java/junit ../after.udb
 und analyze ../after.udb
 ```
 
+A kiviat is also generated, for project metrics: use the --prjMetrics parameter. In the case of comparing jUnit 4.9 against 4.12, we get this kiviat:
+
+![Diff kiviat](example-kiviat-diff.png)
+
 Special Thanks
 ==============
 We would like to thank [Softplan](http://www.softplan.com.br) and [Nexxera](http://www.nexxera.com) for their partial support of the development of these utilities. 
