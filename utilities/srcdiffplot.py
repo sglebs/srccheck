@@ -29,7 +29,7 @@ Options:
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
   --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved,method ~Unknown ~Unresolved,procedure ~Unknown ~Unresolved,routine ~Unknown ~Unresolved,classmethod ~Unknown ~Unresolved]
-  --prjMetrics=<prjMetrics>                     A CSV containing project metric names you want to plot [default: CountDeclFile,CountDeclClass,CountLineCode,CountPathLog,CountStmt,AvgLineCode,Cyclomatic,AvgCyclomatic,MaxCyclomatic,SumCyclomatic,Essential,MaxEssential,CountDeclMethod,MaxNesting]
+  --prjMetrics=<prjMetrics>                     A CSV containing project metric names you want to plot [default: CountDeclFile,CountDeclClass,CountLineCode,CountPath,CountStmt,AvgLineCode,Cyclomatic,AvgCyclomatic,MaxCyclomatic,SumCyclomatic,Essential,MaxEssential,CountDeclMethod,MaxNesting]
   --fileMetrics=<fileMetrics>                   A CSV containing file metric names you want to plot [default: CountLineCode,CountDeclFunction,CountDeclClass]
   --classMetrics=<classMetrics>                 A CSV containing class metric names you want to plot [default: CountDeclMethod,PercentLackOfCohesion,MaxInheritanceTree,CountClassCoupled]
   --routineMetrics=<routineMetrics>             A CSV containing routine metric names you want to plot [default: CountLineCode,CountParams,CyclomaticStrict]
@@ -76,39 +76,6 @@ def plot_diff_class_metrics (db_before, db_after, cmdline_arguments):
 def plot_diff_routine_metrics (db_before, db_after, cmdline_arguments):
     return plot_diff_generic_metrics(db_before, db_after, cmdline_arguments, cmdline_arguments["--routineMetrics"], cmdline_arguments["--routineQuery"], cmdline_arguments.get("--regexIgnoreRoutines", None), "Routine")
 
-
-# def prune_unchanged (before_after, diff_tag):
-#     return {name:metrics_by_before_after_tag for name, metrics_by_before_after_tag in before_after.items() if diff_tag in metrics_by_before_after_tag}
-
-# def _compute_dict_diff (dict_a, dict_b, skip_zeroes = False):
-#     result = {}
-#     for key_a, value_a in dict_a.items():
-#         value_b = dict_b.get(key_a, 0)
-#         delta = value_b - value_a
-#         if skip_zeroes and delta == 0:
-#             continue
-#         result[key_a] = delta
-#     for key_b, value_b in dict_b.items():
-#         if key_b not in dict_a: # new metric, was not present in the file
-#             result[key_b] = value_b
-#     return result
-
-# def populate_diffs(before_after_by_ent_name, tag_before, tag_after, tag_diff, prune_before_after = False):
-#     for file_path, dict_before_after in before_after_by_ent_name.items():
-#         metrics_before = dict_before_after.get(tag_before, None)
-#         if metrics_before is None: # new entity, no "before" state
-#             continue
-#         if prune_before_after:
-#             del dict_before_after[tag_before]
-#         metrics_after = dict_before_after.get(tag_after, None)
-#         if metrics_after is None: # deleted entity, no "after" state
-#             continue
-#         if prune_before_after:
-#             del dict_before_after[tag_after]
-#         if metrics_before == metrics_after: # no diff at all
-#             continue
-#         dict_before_after[tag_diff] = _compute_dict_diff(metrics_before, metrics_after, skip_zeroes=prune_before_after)
-
 def _name_of_entity(entity, scope):
     if scope == "File":
         return entity.relname()
@@ -142,16 +109,6 @@ def compute_metrics_before_after (db_before, db_after, cmdline_arguments, metric
         before_after_by_entity_name[_name_of_entity(entity,scope_name)] = attribs
     return before_after_by_entity_name
 
-# def compute_metrics_diff (db_before, db_after, cmdline_arguments, metrics_as_string, entityQuery, regex_str_ignore_item, scope_name, prune_before_after = True):
-#     before_after_by_entity_name = compute_metrics_before_after(db_before, db_after, cmdline_arguments, metrics_as_string, entityQuery, regex_str_ignore_item, scope_name)
-#     populate_diffs(before_after_by_entity_name, "before", "after", "diff", prune_before_after = prune_before_after)
-#     return prune_unchanged(before_after_by_entity_name,"diff")
-
-# def collect_values (before_after_by_entity_name, tag, metric_name):
-#     result = []
-#     for entity_name, entity_props in before_after_by_entity_name.items():
-#         result.append(entity_props.get(tag, {}).get(metric_name, 0))
-#     return result
 
 def collect_values_that_changed (before_after_by_entity_name, tag_before, tag_after, metric_name, minimal_change):
     results_before = []
@@ -196,7 +153,6 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
                                                                scope_name)
 
     metric_names = [metric.strip() for metric in metrics_as_string.split(",")]
-    result={}
     for i, metric_name in enumerate(metric_names):
         all_before, all_after, entity_names = collect_values_that_changed(before_after_by_entity_name, "before", "after", metric_name, int(cmdline_arguments["--minChange"]))
         if len(all_before) > 0:
@@ -213,10 +169,7 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
                                      show_diagonal=True,
                                      format="html")
             print("Saved %s" % file_name)
-        sum_before = sum(all_before)
-        sum_after = sum (all_after)
-        result[metric_name] = {"sum_before": sum_before, "sum_after": sum_after, "element_count": len(all_before)}
-    return result
+    return before_after_by_entity_name
 
 
 def main():
