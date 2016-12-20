@@ -7,6 +7,7 @@ Usage:
                 [--fileQuery=<fileQuery>]\r\n \
                 [--classQuery=<classQuery>]\r\n \
                 [--routineQuery=<routineQuery>]\r\n \
+                [--prjMetrics=<fileMetrics>]\r\n \
                 [--fileMetrics=<fileMetrics>]\r\n \
                 [--classMetrics=<classMetrics>]\r\n \
                 [--routineMetrics=<routineMetrics>]\r\n \
@@ -17,6 +18,7 @@ Usage:
                 [--ballSize=<ballSize>] \r\n \
                 [--minChange=<minChange>] \r\n \
                 [--showMeanMedian] \r\n \
+                [--skipPrjMetrics=<skipPrjMetrics>]\r\n \
                 [--verbose]
 
 Options:
@@ -27,9 +29,10 @@ Options:
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
   --routineQuery=<routineQuery>                 Kinds of routines your language has. [default: function ~Unknown ~Unresolved,method ~Unknown ~Unresolved,procedure ~Unknown ~Unresolved,routine ~Unknown ~Unresolved,classmethod ~Unknown ~Unresolved]
-  --fileMetrics=<maxFileMetrics>                A CSV containing file metric names you want to plot [default: CountLineCode,CountDeclFunction,CountDeclClass]
+  --prjMetrics=<prjMetrics>                     A CSV containing project metric names you want to plot [default: CountDeclFile,CountDeclClass,CountLineCode,CountPathLog,CountStmt,AvgLineCode,Cyclomatic,AvgCyclomatic,MaxCyclomatic,SumCyclomatic,Essential,MaxEssential,CountDeclMethod,MaxNesting]
+  --fileMetrics=<fileMetrics>                   A CSV containing file metric names you want to plot [default: CountLineCode,CountDeclFunction,CountDeclClass]
   --classMetrics=<classMetrics>                 A CSV containing class metric names you want to plot [default: CountDeclMethod,PercentLackOfCohesion,MaxInheritanceTree,CountClassCoupled]
-  --routineMetrics=<maxClassMetrics>            A CSV containing routine metric names you want to plot [default: CountLineCode,CountParams,CyclomaticStrict]
+  --routineMetrics=<routineMetrics>             A CSV containing routine metric names you want to plot [default: CountLineCode,CountParams,CyclomaticStrict]
   --regexTraverseFiles=<regexTraverseFiles>     A regex to filter files in / traverse. Defaults to all [default: .*]
   --regexIgnoreFiles=<regexIgnoreFiles>         A regex to filter files out
   --regexIgnoreClasses=<regexIgnoreClasses>     A regex to filter classes out
@@ -38,6 +41,7 @@ Options:
   --minChange=<minChange>                       Minimum change in metric value to be considered for the plot [Default: 1]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -m, --showMeanMedian                          If you want to show circles for mean (blue), median (yellow), stdev (cyan) [default: false]
+  --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -239,19 +243,25 @@ def main():
         sys.exit(-2)
 
     print("Processing %s and %s" % (db_before.name(), db_after.name()))
+
+    for plot_lambda in [plot_diff_file_metrics, plot_diff_class_metrics,plot_diff_routine_metrics]:
+        plot_lambda(db_before, db_after, arguments)
+
+
+    prj_metric_names = [metric.strip() for metric in arguments["--prjMetrics"].split(",")]
+    prj_metrics_before = db_before.metric(prj_metric_names)
+    prj_metrics_after = db_after.metric(prj_metric_names)
     all_metric_names = []
     all_metric_values = []
     all_thresholds = []
-
-    for plot_lambda, scope in [(plot_diff_file_metrics, "File"), (plot_diff_class_metrics, "Class"), (plot_diff_routine_metrics, "Routine")]:
-        data_by_metric_name = plot_lambda(db_before, db_after, arguments)
-        for metric_name in sorted(data_by_metric_name.keys()):
-            all_metric_names.append("%s\n%s" % (scope, metric_name))
-            all_metric_values.append(data_by_metric_name[metric_name]["sum_after"])
-            all_thresholds.append(data_by_metric_name[metric_name]["sum_before"])
+    for prj_metric_name in sorted(prj_metric_names):
+        all_metric_names.append(prj_metric_name)
+        all_metric_values.append(prj_metrics_after.get(prj_metric_name,0))
+        all_thresholds.append(prj_metrics_before.get(prj_metric_name,0))
 
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
-    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "Sum of Metrics (Changed Elements)", thresholdslabel="before", valueslabel="after")
+    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
+
 
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
