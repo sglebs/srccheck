@@ -171,6 +171,12 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
             print("Saved %s" % file_name)
     return before_after_by_entity_name
 
+def print_growth_rates(all_metric_names, all_growth_rates):
+    print("\nMetric Growth Rate in Project")
+    print ("--------------------------------------")
+    for name, growth_rate in zip(all_metric_names, all_growth_rates):
+        print("%s:\t%f" % (name.replace("\n", " "), growth_rate))
+
 
 def main():
     start_time = datetime.datetime.now()
@@ -205,17 +211,24 @@ def main():
     prj_metrics_before = db_before.metric(prj_metric_names)
     prj_metrics_after = db_after.metric(prj_metric_names)
     all_metric_names = []
-    all_metric_values = []
-    all_thresholds = []
+    all_metric_values_before = []
+    all_metric_values_after = []
+    all_growth_rates = []
     for prj_metric_name in sorted(prj_metric_names):
         all_metric_names.append(prj_metric_name)
-        all_metric_values.append(prj_metrics_after.get(prj_metric_name,0))
-        all_thresholds.append(prj_metrics_before.get(prj_metric_name,0))
-
+        metric_value_before = prj_metrics_before.get(prj_metric_name,0)
+        all_metric_values_before.append(metric_value_before)
+        metric_value_after = prj_metrics_after.get(prj_metric_name,0)
+        all_metric_values_after.append(metric_value_after)
+        if metric_value_before == 0:
+            all_growth_rates.append(float("inf"))
+        else:
+            all_growth_rates.append(metric_value_after/metric_value_before)
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
-    save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values, all_thresholds, file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
-
-
+    saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
+    if saved_file_name is not None:
+        print("Saved %s" % saved_file_name)
+    print_growth_rates(all_metric_names, all_growth_rates)
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
