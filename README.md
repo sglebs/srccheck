@@ -332,6 +332,27 @@ A kiviat is also generated, for project metrics: use the --prjMetrics parameter.
 
 ![Diff kiviat](example-kiviat-diff.png)
 
+The tool will also print project growth rates for the metrics you selected with the --prjMetrics parameter. Example:
+
+```
+Metric Growth Rate in Project
+--------------------------------------
+AvgCyclomatic:	1.000000
+AvgLineCode:	1.137255
+CountDeclClass:	1.000000
+CountDeclFile:	1.000000
+CountDeclMethod:	1.161491
+CountLineCode:	1.137311
+CountPath:	1.097561
+CountStmt:	1.068467
+Cyclomatic:	1.111111
+Essential:	1.137324
+MaxCyclomatic:	1.000000
+MaxEssential:	1.000000
+MaxNesting:	1.000000
+SumCyclomatic:	1.111111
+```
+
 Special Thanks
 ==============
 We would like to thank [Softplan](http://www.softplan.com.br) and [Nexxera](http://www.nexxera.com) for their partial support of the development of these utilities. 
