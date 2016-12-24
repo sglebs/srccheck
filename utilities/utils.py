@@ -1,6 +1,7 @@
 import re
 import statistics
 
+import requests
 from matplotlib import use as backend_use
 backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other import.
 from matplotlib import pyplot as plt
@@ -235,3 +236,34 @@ def save_kiviat_with_values_and_thresholds (labels, values, threshold_values, fi
         plt.title(title, y=1.08)
     plt.savefig(file_name, dpi=72)
     return file_name
+
+
+def post_metrics_to_sonar (cmdline_arguments, cur_tracked_metrics):
+    TIMEOUT = 4
+    sonar_url = cmdline_arguments["--sonarURL"]
+    sonar_prj = cmdline_arguments["--sonarPrj"]
+    sonar_user = cmdline_arguments["--sonarUser"]
+    sonar_pass = cmdline_arguments["--sonarPass"]
+    if sonar_prj == "#":
+        print ("*** Skipping posting to Sonar (PRJ=%s)" % sonar_prj)
+        return
+    for metric, value in cur_tracked_metrics.items():
+        rest_params = {}
+        rest_params["resource"] = sonar_prj
+        rest_params["metric"] = metric.lower().replace(" ", "_").replace(":", "_") # SONAR wants its key, which is lowercase. get rid of stats special char :
+        rest_params["val"] = value
+        try:
+            response = requests.post(sonar_url, rest_params, timeout=TIMEOUT, auth=(sonar_user, sonar_pass))
+            if response.status_code != 200:
+                print ("*** Response error %s for metric '%s' when connecting to %s with params %s: \t%s" % (response.status_code, metric, sonar_url, rest_params, str(response.content)))
+            else:
+                print ("+++ Metric %s=%s posted to prj %s in %s (%s)" % (metric, value, sonar_prj, sonar_url, str(response.content)))
+        except requests.exceptions.Timeout:
+            print ("*** Timeout connecting to %s" % sonar_url)
+            return
+        except requests.exceptions.HTTPError:
+            print ("*** HTTP Error connecting to %s" % sonar_url)
+            return
+        except requests.exceptions.ConnectionError:
+            print ("*** Connection Error connecting to %s" % sonar_url)
+            return

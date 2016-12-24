@@ -19,6 +19,10 @@ Usage:
                 [--minChange=<minChange>] \r\n \
                 [--showMeanMedian] \r\n \
                 [--skipPrjMetrics=<skipPrjMetrics>]\r\n \
+                [--sonarURL=<sonarURL>] \r\n \
+                [--sonarPrj=<sonarPrj>] \r\n \
+                [--sonarUser=<sonarUser>] \r\n \
+                [--sonarPass=<sonarPass>] \r\n \
                 [--verbose]
 
 Options:
@@ -42,6 +46,10 @@ Options:
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -m, --showMeanMedian                          If you want to show circles for mean (blue), median (yellow), stdev (cyan) [default: false]
   --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
+  --sonarURL=<sonarURL>                         URL to post metrics into Sonar [default: http://localhost:9000/api/manual_measures]
+  --sonarPrj=<sonarPrj>                         Name of Project in Sonar [default: #]
+  --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
+  --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -64,7 +72,7 @@ import sys
 from docopt import docopt
 
 from utilities import VERSION
-from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds, post_metrics_to_sonar
 
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
@@ -178,6 +186,25 @@ def print_growth_rates(all_metric_names, all_growth_rates):
         print("%s:\t%f" % (name.replace("\n", " "), growth_rate))
 
 
+def collect_metric_names_with_values_and_growth(db_after, db_before, prj_metric_names):
+    prj_metrics_before = db_before.metric(prj_metric_names)
+    prj_metrics_after = db_after.metric(prj_metric_names)
+    all_metric_names = []
+    all_metric_values_before = []
+    all_metric_values_after = []
+    all_growth_rates = []
+    for prj_metric_name in sorted(prj_metric_names):
+        all_metric_names.append(prj_metric_name)
+        metric_value_before = prj_metrics_before.get(prj_metric_name, 0)
+        all_metric_values_before.append(metric_value_before)
+        metric_value_after = prj_metrics_after.get(prj_metric_name, 0)
+        all_metric_values_after.append(metric_value_after)
+        if metric_value_before == 0:
+            all_growth_rates.append(float("inf"))
+        else:
+            all_growth_rates.append(metric_value_after / metric_value_before)
+    return all_metric_names, all_metric_values_before, all_metric_values_after, all_growth_rates
+
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
@@ -208,27 +235,15 @@ def main():
 
 
     prj_metric_names = [metric.strip() for metric in arguments["--prjMetrics"].split(",")]
-    prj_metrics_before = db_before.metric(prj_metric_names)
-    prj_metrics_after = db_after.metric(prj_metric_names)
-    all_metric_names = []
-    all_metric_values_before = []
-    all_metric_values_after = []
-    all_growth_rates = []
-    for prj_metric_name in sorted(prj_metric_names):
-        all_metric_names.append(prj_metric_name)
-        metric_value_before = prj_metrics_before.get(prj_metric_name,0)
-        all_metric_values_before.append(metric_value_before)
-        metric_value_after = prj_metrics_after.get(prj_metric_name,0)
-        all_metric_values_after.append(metric_value_after)
-        if metric_value_before == 0:
-            all_growth_rates.append(float("inf"))
-        else:
-            all_growth_rates.append(metric_value_after/metric_value_before)
+    all_metric_names, all_metric_values_before, all_metric_values_after, all_growth_rates = collect_metric_names_with_values_and_growth(
+        db_after, db_before, prj_metric_names)
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
     saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
     if saved_file_name is not None:
         print("Saved %s" % saved_file_name)
     print_growth_rates(all_metric_names, all_growth_rates)
+    rates_by_adjusted_metric_name = {"Prj %s growth rate" % metric_name : rate for metric_name, rate in zip (all_metric_names, all_growth_rates)}
+    post_metrics_to_sonar(arguments, rates_by_adjusted_metric_name)
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
@@ -237,6 +252,10 @@ def main():
     print("--------------------------------------------------")
     db_before.close()
     db_after.close()
+
+
+
+
 
 if __name__ == '__main__':
     main()
