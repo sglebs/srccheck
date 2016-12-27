@@ -30,19 +30,35 @@ with the same name as the UDB file (just different file extension). Here is an e
 
 If the green values are higher, you are ok. If the orange values are higher, you blew past the maximum allowed value for the metric.
 
+
+Note that the exit code of srccheck is the number of violations found. This allows you to incorporate srccheck
+into your workflow regardless of the build tool used.
+
 If you want to publish some metrics as a dashboard in SONAR, you can also do it. For that, you must first
-register Manual Measures in SONAR, and srccheck will use this [Manual Measures API](http://docs.codehaus.org/pages/viewpage.action?pageId=229743270).
+register your custom metrics in SONAR, which will differ in versions prior to 5.2 and after 5.2:
+
+
+SONAR 5.1 and below
+-------------------
+You need to set up [Manual Measures](http://docs.sonarqube.org/display/SONARQUBE51/Manual+Measures) in SONAR and srccheck will use its [Manual Measures API](http://docs.codehaus.org/pages/viewpage.action?pageId=229743270).
 The steps are:
 
  * Login into SONAR as Administrator
  * Configuration/Manual Measures
  * Add Measure
 
-Note that the exit code of this script is the number of violations found. This allows you to incorporate srccheck
-into your workflow regardless of the build tool used.
+SONAR 5.2 and above
+-------------------
+You need to set up [Custom Measures](http://docs.sonarqube.org/display/SONAR/Custom+Measures) in SONAR and srccheck will use this API.
+The steps are:
 
-How to Install It
-=================
+ * Login into SONAR as Administrator
+ * Go to Administration > Configuration > Custom Metrics
+ * Create Metric
+
+
+How to Install srccheck
+=======================
 
 Make sure your Python has paver installed (pip3 install paver) and then run:
 ```
@@ -56,8 +72,8 @@ Under Linux, some users reported that you need to install some libraries before 
 
 
 
-How to Upgrade It
-=================
+How to Upgrade srccheck
+=======================
 
 ```
 pip3 install --upgrade git+https://github.com/sglebs/srccheck

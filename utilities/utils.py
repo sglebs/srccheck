@@ -1,6 +1,6 @@
 import re
 import statistics
-
+import json
 import requests
 from matplotlib import use as backend_use
 backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other import.
@@ -245,25 +245,48 @@ def post_metrics_to_sonar (cmdline_arguments, cur_tracked_metrics):
     sonar_user = cmdline_arguments["--sonarUser"]
     sonar_pass = cmdline_arguments["--sonarPass"]
     if sonar_prj == "#":
-        print ("*** Skipping posting to Sonar (PRJ=%s)" % sonar_prj)
+        print("*** Skipping posting to Sonar (PRJ=%s)" % sonar_prj)
         return
     for metric, value in cur_tracked_metrics.items():
-        rest_params = {}
-        rest_params["resource"] = sonar_prj
-        rest_params["metric"] = metric.lower().replace(" ", "_").replace(":", "_") # SONAR wants its key, which is lowercase. get rid of stats special char :
-        rest_params["val"] = value
+        metric_name = metric.lower().replace(" ", "_").replace(":", "_") # SONAR wants its key, which is lowercase. get rid of stats special char :
         try:
-            response = requests.post(sonar_url, rest_params, timeout=TIMEOUT, auth=(sonar_user, sonar_pass))
+            url = "%s/api/manual_measures" % sonar_url
+            params = {"resource": sonar_prj, "metric": metric_name, "val": value}
+            response = requests.post(url, params, timeout=TIMEOUT, auth=(sonar_user, sonar_pass))
+            if response.status_code != 200: # Fix for #57 - try newer SONAR API
+                url = "%s/api/custom_measures/create" % sonar_url
+                params = {"projectKey": sonar_prj, "metricKey": metric_name,"value": value}
+                response = requests.post(url, params, timeout=TIMEOUT,
+                                         auth=(sonar_user, sonar_pass))
+                if response.status_code == 400: # metric already created, we need to update it. But we need the metric ID for that
+                    url = "%s/api/custom_measures/search" % sonar_url
+                    params = {"projectKey": sonar_prj}
+                    response = requests.post(url, params, timeout=TIMEOUT,
+                                         auth=(sonar_user, sonar_pass))
+                    metric_id = extract_metric_id_from_sonar_metric_search(metric_name, json.loads(response.text))
+                    if metric_id is not None:
+                        url = "%s/api/custom_measures/update" % sonar_url
+                        params = {"projectKey": sonar_prj, "id": metric_id,"value": value}
+                        response = requests.post(url, params, timeout=TIMEOUT,
+                                                 auth=(sonar_user, sonar_pass))
             if response.status_code != 200:
-                print ("*** Response error %s for metric '%s' when connecting to %s with params %s: \t%s" % (response.status_code, metric, sonar_url, rest_params, str(response.content)))
+                print("*** Response error %s for metric '%s' when connecting to %s with params %s: \t%s" % (response.status_code, metric, url, params, str(response.content)))
             else:
-                print ("+++ Metric %s=%s posted to prj %s in %s (%s)" % (metric, value, sonar_prj, sonar_url, str(response.content)))
+                print("+++ Metric %s=%s posted to prj %s in %s (%s)" % (metric, value, sonar_prj, sonar_url, str(response.content)))
         except requests.exceptions.Timeout:
-            print ("*** Timeout connecting to %s" % sonar_url)
+            print("*** Timeout connecting to %s" % sonar_url)
             return
         except requests.exceptions.HTTPError:
-            print ("*** HTTP Error connecting to %s" % sonar_url)
+            print("*** HTTP Error connecting to %s" % sonar_url)
             return
         except requests.exceptions.ConnectionError:
-            print ("*** Connection Error connecting to %s" % sonar_url)
+            print("*** Connection Error connecting to %s" % sonar_url)
             return
+
+def extract_metric_id_from_sonar_metric_search(metric_key_to_find, json_response):
+    for entry_as_dict in json_response.get("customMeasures", []):
+        metric_attribs = entry_as_dict.get("metric", {})
+        metric_key = metric_attribs.get("key", None)
+        if metric_key == metric_key_to_find:
+            return entry_as_dict.get("id", None)
+    return None

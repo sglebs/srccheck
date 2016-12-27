@@ -46,7 +46,7 @@ Options:
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -m, --showMeanMedian                          If you want to show circles for mean (blue), median (yellow), stdev (cyan) [default: false]
   --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
-  --sonarURL=<sonarURL>                         URL to post metrics into Sonar [default: http://localhost:9000/api/manual_measures]
+  --sonarURL=<sonarURL>                         URL to your Sonar [default: http://localhost:9000]
   --sonarPrj=<sonarPrj>                         Name of Project in Sonar [default: #]
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
