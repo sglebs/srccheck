@@ -19,6 +19,7 @@ Usage:
                 [--minChange=<minChange>] \r\n \
                 [--showMeanMedian] \r\n \
                 [--skipPrjMetrics=<skipPrjMetrics>]\r\n \
+                [--outputCSV=<outputCSV>] \r\n \
                 [--sonarURL=<sonarURL>] \r\n \
                 [--sonarPrj=<sonarPrj>] \r\n \
                 [--sonarUser=<sonarUser>] \r\n \
@@ -50,6 +51,7 @@ Options:
   --sonarPrj=<sonarPrj>                         Name of Project in Sonar [default: #]
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
+  --outputCSV=<outputCSV>                       Output CSV file path with the prj growth ratios for metrics listed at --maxPrjMetrics. Useful with the Jenkins/Plot plugin [default: diffmetrics.csv]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -72,7 +74,7 @@ import sys
 from docopt import docopt
 
 from utilities import VERSION
-from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds, post_metrics_to_sonar
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds, post_metrics_to_sonar, save_csv
 
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
@@ -243,6 +245,11 @@ def main():
         print("Saved %s" % saved_file_name)
     print_growth_rates(all_metric_names, all_growth_rates)
     rates_by_adjusted_metric_name = {"Prj %s growth rate" % metric_name : rate for metric_name, rate in zip (all_metric_names, all_growth_rates)}
+    csv_ok = save_csv(arguments["--outputCSV"], rates_by_adjusted_metric_name)
+    if csv_ok:
+        print("+++ Growth ratio metrics saved to %s" % arguments["--outputCSV"])
+    else:
+        print("\n*** Problems creating CSV file %s" % arguments["--outputCSV"])
     post_metrics_to_sonar(arguments, rates_by_adjusted_metric_name)
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
