@@ -57,6 +57,8 @@ The steps are:
  * Create Metric
 
 
+NOTE: you can also break your build using SONAR's [Build Breaker Plugin](https://github.com/SonarQubeCommunity/sonar-build-breaker) if you prefer.
+
 How to Install srccheck
 =======================
 
@@ -368,6 +370,16 @@ MaxEssential:	1.000000
 MaxNesting:	1.000000
 SumCyclomatic:	1.111111
 ```
+
+These rates can also be posted to SONAR, using the --sonarPrj parameter. If you want to break the build if the growth rate of a metric is too large, you can use the [Build Breaker Plugin](https://github.com/SonarQubeCommunity/sonar-build-breaker).
+Note that first you will need to create custom measures as explained at the top of this document, for srccheck. Make sure to create them of kind Size and type FLOAT in SONAR.
+The metric key names for diffs should be:
+
+```
+prj_XXX_growth_rate
+```
+
+where XXX is the name of the metric for SciTools Understand, all lowercase. Example: prj_avgcyclomatic_growth_rate for diffs of AvgCyclomatic.
 
 Special Thanks
 ==============
