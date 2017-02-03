@@ -76,7 +76,10 @@ def scatter_plot (db, cmdline_arguments,
                   ball_metric_name,
                   ball_size_min,
                   ball_size_max,
-                  ball_size_rate):
+                  ball_size_rate,
+                  x_metric_min_value=0.0,
+                  y_metric_min_value=0.0,
+                  ball_metric_min_value=0.0):
     regex_str_traverse_files = cmdline_arguments.get("--regexTraverseFiles", "*")
     regex_ignore_files = cmdline_arguments.get("--regexIgnoreFiles", None)
     entities = db.ents(entityQuery)
@@ -96,20 +99,22 @@ def scatter_plot (db, cmdline_arguments,
                                                                                      regex_ignore_files):
         entity_name = entity.relname() if scope_name == "File" else entity.longname()
         annotations.append(entity_name)
-        x_metric = metric_dict[x_metric_name]
-        if x_metric is None:
+        x_metric_value = metric_dict[x_metric_name]
+        if x_metric_value is None:
             print("ERROR. Missing metric %s for X Axis (entity=%s (%s), file=%s)" % (x_metric_name, entity.kindname(), entity_name, container_file))
             return False
-        x_values.append(x_metric)
-        y_metric = metric_dict[y_metric_name]
-        if y_metric is None:
+        y_metric_value = metric_dict[y_metric_name]
+        if y_metric_value is None:
             print("ERROR. Missing metric %s for Y Axis (entity=%s (%s), file=%s)" % (y_metric_name, entity.kindname(), entity_name, container_file))
             return False
-        y_values.append(y_metric)
-        ball_metric = metric_dict[ball_metric_name]
-        if ball_metric is None:
-            ball_metric = 0
-        ball_values.append(min(ball_size_max,ball_size_rate * ball_metric + ball_size_min))
+        ball_metric_value = metric_dict[ball_metric_name]
+        if ball_metric_value is None:
+            ball_metric_value = 0
+        if x_metric_value < float(x_metric_min_value) and y_metric_value < float(y_metric_min_value) and ball_metric_value < float(ball_metric_min_value):
+            continue # fix for #59 - able to toss uninteresting elements out
+        x_values.append(x_metric_value)
+        y_values.append(y_metric_value)
+        ball_values.append(min(ball_size_max,ball_size_rate * ball_metric_value + ball_size_min))
         color_values.append(0 if container_file is None else hash(os.path.dirname(container_file.longname())))
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
                              color_values, "directory", annotations, os.path.split(db.name())[-1], scope_name)
@@ -164,7 +169,11 @@ def main():
                           scope_config.get("ballMetric", "MaxNesting"),
                           float(scope_config.get("ballSizeMin", 40)),
                           float(scope_config.get("ballSizeMax", 4000)),
-                          float(scope_config.get("ballSizeRate", 10)))
+                          float(scope_config.get("ballSizeRate", 10)),
+                          x_metric_min_value=float(scope_config.get("xMetricMinValue", 0.0)),
+                          y_metric_min_value=float(scope_config.get("yMetricMinValue", 0.0)),
+                          ball_metric_min_value=float(scope_config.get("ballMetricMinValue", 0.0))
+                        )
             if not ok:
                 print("WARNING/SKIPPING: Could not create plot for scope %s with config %s" % (scope_name, scope_config))
                 continue
