@@ -248,9 +248,15 @@ multiple plots for each scope). Each config should have these keys (all optional
  * ballSizeMin: Minimum size of the circles, even if the metric is 0. Default: 40
  * ballSizeMax: Maximum size of the circles, even if the metric is very very large. Default: 4000
  * ballSizeRate: How many units of size the circle grows per unit of the metric. Default: 10
+ * xMetricMinValue: Elements will be potentially discarded if the x metric is below this threshold. Default: 0.
+ * yMetricMinValue: Elements will be potentially discarded if the y metric is below this threshold. Default: 0.
+ * ballMetricMinValue: Elements will be potentially discarded if the ball metric is below this threshold. Default: 0.
+
+NOTE: for the Min Values above, an element will only be discarded if all 3 metrics (x, y, ball) are all below 
+their corresponding minimal values.
 
  
-Here's an example for Django sources:
+Here's an example for Django sources, using the defaults:
 
 ```
 srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb
