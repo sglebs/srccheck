@@ -183,7 +183,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
         max_values_allowed_by_metric = {}
     if len(max_values_allowed_by_metric) == 0: # No metrics passed in
         print ("*** EMPTY Metrics. JSON error? (%s)" % max_metrics_json)
-        return [0, {}]
+        return [0, {}, {}]
     highest_values_found_by_metric = {}
     last_processed_metric = "" # fix for #21, to reuse values
     last_all_values = [] # fix for #21, to reuse values
