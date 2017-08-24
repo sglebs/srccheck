@@ -98,7 +98,6 @@ def scatter_plot (db, cmdline_arguments,
                                                                                      regex_str_traverse_files,
                                                                                      regex_ignore_files):
         entity_name = entity.relname() if scope_name == "File" else entity.longname()
-        annotations.append(entity_name)
         x_metric_value = metric_dict[x_metric_name]
         if x_metric_value is None:
             print("ERROR. Missing metric %s for X Axis (entity=%s (%s), file=%s)" % (x_metric_name, entity.kindname(), entity_name, container_file))
@@ -112,6 +111,7 @@ def scatter_plot (db, cmdline_arguments,
             ball_metric_value = 0
         if x_metric_value < float(x_metric_min_value) and y_metric_value < float(y_metric_min_value) and ball_metric_value < float(ball_metric_min_value):
             continue # fix for #59 - able to toss uninteresting elements out
+        annotations.append(entity_name)
         x_values.append(x_metric_value)
         y_values.append(y_metric_value)
         ball_values.append(min(ball_size_max,ball_size_rate * ball_metric_value + ball_size_min))
