@@ -98,10 +98,10 @@ def stream_of_entity_with_metric (entities, metric, verbose, skipLibraries,regex
             if skip_zeroes:
                 continue
             if verbose:
-                print("WARNING: metric is zero for %s" % entity )
+                print("WARNING: %s=0 for %s" % (metric, entity))
         if metric_value < 0:
             if verbose:
-                print("WARNING: metric is negative %s" % entity)
+                print("WARNING: %s<0 for %s" % (metric, entity))
         yield [entity, container_file, metric, metric_value]
 
 
@@ -147,6 +147,13 @@ def save_histogram(show_mean_median, use_logarithmic_scale, filename_prefix, max
     return [filename, mean, median, pstdev]
 
 
+def _save_figure_as_html(fig, filename):
+    with open(filename, "w") as output_file:
+        output_file.write("<html><head></head><body>")
+        mpld3.save_html(fig, output_file)
+        output_file.write("</body></html>")
+
+
 def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, color_values, color_label, annotations, filename_prefix, scope_name, show_diagonal=False, format="html"):
     #plt.figure()  # new one, or they will be mixed
     fig, ax = plt.subplots()
@@ -164,7 +171,7 @@ def save_scatter(x_values, x_label, y_values, y_label, ball_values, ball_label, 
         mpld3.plugins.connect(fig, tooltip)
         mpld3.plugins.connect(fig, mpld3.plugins.MousePosition(fmt=".2f"))
         mpld3.plugins.connect(fig, ClickSendToBack(scatter))
-        mpld3.save_html(fig, filename)
+        _save_figure_as_html(fig, filename)
     else:
         plt.savefig(filename, dpi=72)
     return filename
@@ -193,7 +200,7 @@ def save_abstractness_x_instability_scatter(x_values, x_label, y_values, y_label
     mpld3.plugins.connect(fig, mpld3.plugins.MousePosition(fmt=".2f"))
     mpld3.plugins.connect(fig, ClickSendToBack(scatter))
     filename = "%s-scatter-%s-%s_%s_%s.html" % (filename_prefix, scope_name, x_label, y_label, ball_label)
-    mpld3.save_html(fig, filename)
+    _save_figure_as_html(fig, filename)
     return filename
 
 def save_csv (csv_path, cur_tracked_metrics_for_csv):
