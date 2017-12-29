@@ -309,6 +309,18 @@ the circle color. Run the utility with -h for a detailed description of the para
 We also have a tool that generates such CSV files from an Understand UDB file, but it is not Open Source.
 Feel free to contact us if you would like to use it.
  
+Considering that the bigger the distance from the mean diagonal line the worse the situation, you may want to visualize
+the distances in a histogram, to properly prioritize the refactorings. A sample histogram can be seen below:
+
+![Instability histogram for a project](example-instability-histogram.png)
+
+It was generated as follows:
+
+```
+csvhistplot --in=instability-myProject.csv -m
+```
+
+
  
 Diff Plots
 ==========
