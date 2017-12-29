@@ -1,15 +1,17 @@
-"""Source Code OO Instability X Abstractness Histogram Plot (Distance from Mean).
+"""CSV Histogram Plot.
 
 Usage:
-  srcinsthistplot   --in=<inputCSV> \r\n \
-                [--normalizedDistanceColumn=<columnName>] \r\n \
+  csvhistplot   --in=<inputCSV> \r\n \
+                [--histogramColumn=<columnName>] \r\n \
+                [--logarithmic]  \r\n \
                 [--showMeanMedian]
 
 
 Options:
     --in=<inputCSV>                     Input CSV file path. [default: instability.csv]
-    --normalizedDistanceColumn=<columnName>   Name of the column in the CSV with the Normalized Distance values. [default: Normalized Distance]
+    --histogramColumn=<columnName>      Name of the column in the CSV with the Normalized Distance values. [default: Distance Percentage]
     -m, --showMeanMedian                If you want to show dotted lines for mean (blue) and median (red) [default: false]
+    -l, --logarithmic                   If you want logarithmic y scale. [default: false]
 
 
 Author:
@@ -29,30 +31,29 @@ SQRT2 = math.sqrt(2.0)
 
 def hist_plot (cmdline_arguments):
     inputCSV = cmdline_arguments["--in"]
-    normalizedDistanceColumn = cmdline_arguments["--normalizedDistanceColumn"]
-    distances_as_percentages = []
+    histogram_column = cmdline_arguments["--histogramColumn"]
+    data_values = []
     with open(inputCSV, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            normalizedDistance = float(row.get(normalizedDistanceColumn,0))
-            distance_as_percentage = int (math.trunc(100.0 * normalizedDistance))
-            distances_as_percentages.append(distance_as_percentage)
+            data_value = float(row.get(histogram_column,0))
+            data_values.append(data_value)
 
-    max_value = max(distances_as_percentages) if len(distances_as_percentages) > 0 else 0
+    max_value = max(data_values) if len(data_values) > 0 else 0
     file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
-                                                     False, # not logarythmic
+                                                     bool(cmdline_arguments["--logarithmic"]),
                                                      os.path.split(cmdline_arguments["--in"])[-1],
                                                      max_value,
-                                                     "distance from AxI mean sequence",
-                                                     distances_as_percentages,
-                                                     "Components")
+                                                     histogram_column,
+                                                     data_values,
+                                                     "")
     print("Saved %s" % file_name)
 
 
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    print("\r\n====== srcinsthistplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== csvhistplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print("Processing %s" % arguments["--in"])
     hist_plot(arguments)
     end_time = datetime.datetime.now()

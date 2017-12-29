@@ -22,7 +22,7 @@ setup(
             'srchistplot = utilities.srchistplot:main',
             'srcscatterplot = utilities.srcscatterplot:main',
             'srcinstplot = utilities.srcinstplot:main',
-            'srcinsthistplot = utilities.srcinsthistplot:main',
+            'csvhistplot = utilities.csvhistplot:main',
             'srcdiffplot = utilities.srcdiffplot:main',
         ],
     }
