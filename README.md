@@ -401,4 +401,4 @@ where XXX is the name of the metric for SciTools Understand, all lowercase. Exam
 
 Special Thanks
 ==============
-We would like to thank [Softplan](http://www.softplan.com.br) and [Nexxera](http://www.nexxera.com) for their partial support of the development of these utilities. 
+We would like to thank [Softplan](http://www.softplan.com.br) (Anderson Soffa) and [Nexxera](http://www.nexxera.com) (Gustavo Soares) for their partial support of the development of these utilities. 
