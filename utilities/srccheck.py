@@ -90,8 +90,9 @@ import sys
 from docopt import docopt
 
 from utilities import VERSION
-from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv, save_kiviat_with_values_and_thresholds, \
-    post_metrics_to_sonar
+from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv, \
+    save_kiviat_with_values_and_thresholds, \
+    post_metrics_to_sonar, load_metrics_thresholds
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -279,12 +280,7 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
     return [violation_count, highest_values_found_by_metric, max_values_allowed_by_metric]
 
 
-def load_metrics_thresholds(max_metrics_json_or_path):
-    if os.path.isfile(max_metrics_json_or_path):
-        with open(max_metrics_json_or_path) as max_metrics_json:
-            return json.load(max_metrics_json)
-    else:
-        return json.loads(max_metrics_json_or_path)
+
 
 def write_metrics_thresholds(json_path, new_max_metrics):
     if os.path.isfile(json_path):

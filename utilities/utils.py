@@ -1,7 +1,9 @@
+import os.path
 import re
 import statistics
 import json
 import requests
+import urllib.request
 from matplotlib import use as backend_use
 backend_use('Agg') # fixes #32 - change backend to simple one, BEFORE any other import.
 from matplotlib import pyplot as plt
@@ -297,3 +299,28 @@ def extract_metric_id_from_sonar_metric_search(metric_key_to_find, json_response
         if metric_key == metric_key_to_find:
             return entry_as_dict.get("id", None)
     return None
+
+# Adapted (added file): https://stackoverflow.com/questions/7160737/python-how-to-validate-a-url-in-python-malformed-or-not
+URL_REGEX = re.compile(
+        r'^(?:http|ftp|file)s?://', re.IGNORECASE)
+
+
+def is_url (a_string) :
+    return URL_REGEX.match(a_string)
+
+
+def load_json(max_metrics_json_or_path):
+    if os.path.isfile(max_metrics_json_or_path):
+        with open(max_metrics_json_or_path) as max_metrics_json:
+            return json.load(max_metrics_json)
+    elif is_url(max_metrics_json_or_path):
+        with  urllib.request.urlopen(max_metrics_json_or_path) as url_connection:
+        #with requests.get(max_metrics_json_or_path) as url_connection:
+        #    return json.loads(url_connection.text)
+            return json.loads(url_connection.read().decode('utf-8'))
+
+    else:
+        return json.loads(max_metrics_json_or_path)
+
+def load_metrics_thresholds(max_metrics_json_or_path):
+    return load_json(max_metrics_json_or_path)

@@ -49,22 +49,14 @@ import datetime
 import sys
 import os
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metrics, save_scatter
-import json
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, load_json
 from utilities import VERSION
 
 def load_config(config_json_or_path):
-    if os.path.isfile(config_json_or_path):
-        with open(config_json_or_path) as max_metrics_json:
-            try:
-                return json.load(max_metrics_json)
-            except:
-                return {}
-    else:
-        try:
-            return json.loads(config_json_or_path)
-        except:
-            return {}
+    try:
+        return load_json(config_json_or_path)
+    except:
+        return {}
 
 
 def scatter_plot (db, cmdline_arguments,
