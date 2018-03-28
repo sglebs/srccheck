@@ -289,8 +289,8 @@ srcinstplot --in=instability-myProject.csv
  The CSV file should look like this:
 
 ```
-Component,CountLineCode,SumCyclomaticModified,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance
-foo.bar,44,2,0,6,0.000000,2,0,0.000000,0.707107,1.000000
+Component,CountLineCode,SumCyclomaticModified,Efferent Coupling,Afferent Coupling,Instability,Classes,Abstract Classes,Abstractness,Distance,Normalized Distance, Distance Percentage
+foo.bar,44,2,0,6,0.000000,2,0,0.000000,0.707107,1.000000, 100
 ... 
 ...
 ```
@@ -401,4 +401,4 @@ where XXX is the name of the metric for SciTools Understand, all lowercase. Exam
 
 Special Thanks
 ==============
-We would like to thank [Softplan](http://www.softplan.com.br) and [Nexxera](http://www.nexxera.com) for their partial support of the development of these utilities. 
+We would like to thank [Softplan](http://www.softplan.com.br) (Anderson Soffa) and [Nexxera](http://www.nexxera.com) (Gustavo Soares) for their partial support of the development of these utilities. 
