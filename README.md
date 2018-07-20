@@ -72,8 +72,6 @@ Under Linux, some users reported that you need to install some libraries before 
  * Ubuntu: sudo apt-get install python3-tk
  * CentOS: yum install python3-tkinter
 
-
-
 How to Upgrade srccheck
 =======================
 
@@ -93,6 +91,9 @@ pyinstaller --exclude-module understand -F utilities/srccheck.py
 
 Now your *dist* directory should have a standalone native executable which you can copy to a different machine.
 
+Docker Image
+============
+This utility is also provided as a [Docker image](https://hub.docker.com/r/sglebs/srccheck). Usage documentation can be accessed [here](DOCKER.md).
 
 How to Run It
 =============
