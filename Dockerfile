@@ -12,7 +12,7 @@ ENV UNDERSTAND_VERSION="5.0" \
 ENV UNDERSTAND_FILE="Understand-${UNDERSTAND_VERSION}.${UNDERSTAND_BUILD}-Linux-64bit.tgz"
 
 ENV UNDERSTAND_REPO_URL="http://builds.scitools.com/all_builds/b${UNDERSTAND_BUILD}/Understand/${UNDERSTAND_FILE}" \
-    PYTHONPATH="${UNDERSTAND_HOME}/bin/linux64/python" \
+    PYTHONPATH="${UNDERSTAND_HOME}/bin/linux64/Python" \
     UNDERSTAND_USER_HOME="/root/.config/SciTools" \
     PATH="${PATH}:${UNDERSTAND_HOME}/bin/linux64/"
 
@@ -30,5 +30,5 @@ VOLUME "${UNDERSTAND_USER_HOME}"
 
 COPY docker-entrypoint.sh /data/
 
-ENTRYPOINT [ "./docker-entrypoint.sh" ]
+ENTRYPOINT [ "/data/docker-entrypoint.sh" ]
 CMD [ "srccheck" ]
