@@ -5,10 +5,13 @@ WORKDIR /data
 COPY requirements.txt *.py /data/
 ADD utilities /data/utilities
 
-ENV UNDERSTAND_FILE="Understand-5.0.950-Linux-64bit.tgz" \
+ENV UNDERSTAND_VERSION="5.0" \
+    UNDERSTAND_BUILD="955" \
     UNDERSTAND_HOME="/data/scitools"
 
-ENV UNDERSTAND_REPO_URL="http://latest.scitools.com/Understand/${UNDERSTAND_FILE}" \
+ENV UNDERSTAND_FILE="Understand-${UNDERSTAND_VERSION}.${UNDERSTAND_BUILD}-Linux-64bit.tgz"
+
+ENV UNDERSTAND_REPO_URL="http://builds.scitools.com/all_builds/b${UNDERSTAND_BUILD}/Understand/${UNDERSTAND_FILE}" \
     PYTHONPATH="${UNDERSTAND_HOME}/bin/linux64/python" \
     UNDERSTAND_USER_HOME="/root/.config/SciTools" \
     PATH="${PATH}:${UNDERSTAND_HOME}/bin/linux64/"
