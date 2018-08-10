@@ -63,15 +63,22 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
         max_allowed_value = max_values_allowed_by_metric[metric]
         all_values = [] # we may need to collect all values, if we are going to save a histogram
         lambda_stats = None
+        adjusted_metric = metric
         if metric.count(':') == 1: #fix for #42 - can have only 1 :
             lambda_name, adjusted_metric = metric.split(":")
             lambda_stats = STATS_LAMBDAS.get(lambda_name.upper().strip(), None)
+
+        def metric_values(): # generator of a stream of float values, to be consumed by the stats functions
+            with open(cmdline_arguments.get("--in", False)) as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    yield float(row[adjusted_metric])
 
         if lambda_stats is None:  # regular, not stats
             max_value_found = -1
             entity_with_max_value_found = None
             has_stats_counterpart = (":%s" % metric) in "".join(sorted_metrics)
-            for entity, container_file, metric, metric_value in stream_of_entity_with_metric(entities, metric, verbose, skipLibraries, regex_str_ignore_item, regex_str_traverse_files, regex_ignore_files, skip_zeroes=skip_zeroes):
+            for metric_value in metric_values():
                 if has_stats_counterpart: # fix for #22 - cache values for stats
                     all_values.append(metric_value)
                 if metric_value > highest_values_found_by_metric.get(metric, -1): # even a zero we want to tag as a max
@@ -82,7 +89,7 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
                     #lambda_to_print(entity, metric, metric_value, container_file=container_file)
                 if metric_value > max_value_found: # max found, which could be a violator or not
                     max_value_found = metric_value
-                    entity_with_max_value_found = entity
+                    #entity_with_max_value_found = entity
             if entity_with_max_value_found is not None:
                 if bool(cmdline_arguments["--showHighest"]):
                     print("...........................................")
@@ -96,12 +103,6 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
             last_all_values = all_values  # fix for #21, to reuse values
             last_max_value_found = max_value_found
         else: # stats, compute on the whole population
-            def metric_values(): # generator of a stream of float values, to be consumed by the stats functions
-                with open(cmdline_arguments.get("--in", False)) as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        yield float(row[adjusted_metric])
-
             if adjusted_metric == last_processed_metric: # fix for #21 - reuses values, thanks to sorting we know teh pure metric must have come just before
                 all_values = last_all_values
                 max_value_found = last_max_value_found
@@ -158,7 +159,7 @@ def main():
     print(arguments)
 
     adaptive = arguments.get("--adaptive", False)
-    print ("\r\n====== CSV Metrics (%s) ==========" % arguments.get("--maxMetrics", False))
+    print ("\r\n====== CSV KALOI Metrics (%s) ==========" % arguments.get("--maxMetrics", False))
     csv_kaloi_metrics = load_metrics_thresholds(arguments.get("--maxMetrics", False))
     print(csv_kaloi_metrics)
     print ("\r\n====== CSV Metrics that failed the filters  ===========")
