@@ -42,10 +42,6 @@ STATS_LAMBDAS = {"AVG": statistics.mean,
                  "STDEV": statistics.pstdev,
                  "VARIANCE": statistics.pvariance}
 
-class DummyEntity:
-    def longname(self):
-        return ""
-
 def metric_name_for_sorting(metric_name):
     if ":" not in metric_name:
         return metric_name
@@ -89,7 +85,7 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
                 max_allowed = max_values_allowed_by_metric[metric]
                 if metric_value > max_allowed: # we found a violation
                     violation_count = violation_count + 1
-                    print("'%s' violated '%s' threshold: %f"% (entity, metric, metric_value))
+                    print("'%s' violated '%s' threshold: %f > %f"% (entity, metric, metric_value, max_allowed))
                 if metric_value > max_value_found: # max found, which could be a violator or not
                     max_value_found = metric_value
                     entity_with_max_value_found = entity
@@ -100,7 +96,7 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
                     if max_value_found <= max_allowed_value:
                         kind = "non violator"
                     print("INFO: HIGHEST %s %s found (violation threshold is %s):\t" % (metric, kind, max_allowed_value), end="")
-                    print("'%s' violated '%s' threshold: %f"% (entity_with_max_value_found, metric, max_value_found))
+                    print("'%s' violated '%s' threshold: %f > %f"% (entity_with_max_value_found, metric, max_value_found, max_allowed_value))
                     #lambda_to_print(entity_with_max_value_found, metric, max_value_found, container_file=container_file) # prints the max found, which may be a violator or not
                     print("...........................................")
             last_processed_metric = metric  # fix for #21, to reuse values
@@ -125,7 +121,7 @@ def process_csv_metrics (cmdline_arguments, max_values_allowed_by_metric):
             highest_values_found_by_metric[metric] = stats_value
             if stats_value > max_allowed_value:  # we found a violation
                 violation_count = violation_count + 1
-                #lambda_to_print(DummyEntity(), metric, stats_value)
+                print("STATS threshold violation for '%s': %f > %f" % (metric, stats_value, max_allowed_value))
             else:
                 if bool(cmdline_arguments["--showHighest"]):
                     print("...........................................")
