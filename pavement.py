@@ -24,6 +24,7 @@ setup(
             'srcinstplot = utilities.srcinstplot:main',
             'csvhistplot = utilities.csvhistplot:main',
             'srcdiffplot = utilities.srcdiffplot:main',
+            'csvkaloi = utilities.csvkaloi:main',
         ],
     }
 )

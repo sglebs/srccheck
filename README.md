@@ -321,6 +321,14 @@ It was generated as follows:
 csvhistplot --in=instability-myProject.csv -m
 ```
 
+You can enforce the KALOI principle for OO Instability and Abstractness by using the csvkaloi utility on the csv produced by csvinstplot:
+
+```
+csvkaloi --in=instability-myproject.csv --maxMetrics="{\"MEDIAN:Distance Percentage\":40}"
+```
+
+The command above defines that 50% of your components (MEDIAN) should not be too far from the main line - 40% distance, maximum.
+Restricting the MEDIAN (and possibly the standard deviation - STDEV:) one can ensure a good use of APIs and the Dependency Inversion Principle.
 
  
 Diff Plots
