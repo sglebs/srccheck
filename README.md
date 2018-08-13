@@ -307,7 +307,7 @@ The result should look like the graph below.
 If you roll the mouse on the circles, their names are shown, as well as the metrics that represent the circle size and
 the circle color. Run the utility with -h for a detailed description of the parameters.
  
-We also have a tool that generates such CSV files from an Understand UDB file, but it is not Open Source.
+We also have a tool - geninstability - which generates such CSV files from an Understand UDB file, but it is not Open Source.
 Feel free to contact us if you would like to use it.
  
 Considering that the bigger the distance from the mean diagonal line the worse the situation, you may want to visualize
@@ -321,7 +321,7 @@ It was generated as follows:
 csvhistplot --in=instability-myProject.csv -m
 ```
 
-You can enforce the KALOI principle for OO Instability and Abstractness by using the csvkaloi utility on the csv produced by csvinstplot:
+You can enforce the KALOI principle for OO Instability and Abstractness by using the csvkaloi utility on the csv produced by geninstability:
 
 ```
 csvkaloi --in=instability-myproject.csv --maxMetrics="{\"MEDIAN:Distance Percentage\":40}"
