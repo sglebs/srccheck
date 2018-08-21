@@ -93,7 +93,7 @@ Now your *dist* directory should have a standalone native executable which you c
 
 Docker Image
 ============
-This utility is also provided as a [Docker image](https://hub.docker.com/r/sglebs/srccheck). Usage documentation can be accessed [here](DOCKER.md).
+This utility is also provided as a [Docker image](https://hub.docker.com/r/sglebs/srccheck). Usage documentation can be accessed [here](docker/README.md).
 
 How to Run It
 =============

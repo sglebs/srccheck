@@ -2,8 +2,9 @@ FROM python:3.6-jessie
 
 WORKDIR /data
 
-COPY requirements.txt *.py /data/
-ADD utilities /data/utilities
+ADD /docker /data
+ADD /utilities /data/utilities
+COPY requirements.txt setup.py pavement.py /data/
 
 ENV UNDERSTAND_VERSION="5.0" \
     UNDERSTAND_BUILD="955" \
@@ -16,7 +17,6 @@ ENV UNDERSTAND_REPO_URL="http://builds.scitools.com/all_builds/b${UNDERSTAND_BUI
     UNDERSTAND_USER_HOME="/root/.config/SciTools" \
     PATH="${PATH}:${UNDERSTAND_HOME}/bin/linux64/"
 
-
 RUN apt-get update \
     && apt-get install -y curl tar libqt5gui5 \
     && curl -s -O "${UNDERSTAND_REPO_URL}" \
@@ -27,8 +27,6 @@ RUN apt-get update \
     && pip install -r requirements.txt
 
 VOLUME "${UNDERSTAND_USER_HOME}"
-
-COPY docker-entrypoint.sh /data/
 
 ENTRYPOINT [ "/data/docker-entrypoint.sh" ]
 CMD [ "srccheck" ]
