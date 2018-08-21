@@ -1,6 +1,6 @@
 # Supported tags and respective `Dockerfile` links
 
--	[`und-5.0.950`, `latest`, (*Dockerfile*)](https://github.com/sglebs/srccheck/Dockerfile)
+-	[`und-5.0.955`, `latest`, (*Dockerfile*)](https://github.com/sglebs/srccheck/Dockerfile)
 
 ## How to use this image
 
@@ -28,11 +28,11 @@ Below a list of [environment variables](https://docs.docker.com/engine/reference
 
 | Name | Description | Default value |
 |---|---|---|
-| EVALCODE | Evaluation license code provided to run [SciTools Understand][] | - |
-| SDLCODE | Single developer license code provided to run [SciTools Understand][]. `USER_EMAIL_ACCOUNT` must be also provided to enable this activation method | - |
-| USER_EMAIL_ACCOUNT | User email account associated with `SDL` license used to activate [SciTools Understand][]. `SDLCODE` must be also provided to enable this activation method | - |
-| FLOATING_LICENSE_SERVER | Address used to connect [SciTools Understand][] client to a license server | - |
-| FLOATING_LICENSE_SERVER_PORT | Port used to connect [SciTools Understand][] client to a license server. `FLOATING_LICENSE_SERVER` must be also provided to enable this activation method | 9000 |
+| UNDERSTAND_EVALCODE | Evaluation license code provided to run [SciTools Understand][] | - |
+| UNDERSTAND_SDLCODE | Single developer license code provided to run [SciTools Understand][]. `USER_EMAIL_ACCOUNT` must be also provided to enable this activation method | - |
+| UNDERSTAND_USER_EMAIL_ACCOUNT | User email account associated with `SDL` license used to activate [SciTools Understand][]. `SDLCODE` must be also provided to enable this activation method | - |
+| UNDERSTAND_FLOATING_LICENSE_SERVER | Address used to connect [SciTools Understand][] client to a license server | - |
+| UNDERSTAND_FLOATING_LICENSE_SERVER_PORT | Port used to connect [SciTools Understand][] client to a license server. `UNDERSTAND_FLOATING_LICENSE_SERVER` must be also provided to enable this activation method | 9000 |
 
 ## License
 
