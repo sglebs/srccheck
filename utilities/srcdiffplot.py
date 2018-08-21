@@ -8,7 +8,7 @@ Usage:
                 [--fileQuery=<fileQuery>]\r\n \
                 [--classQuery=<classQuery>]\r\n \
                 [--routineQuery=<routineQuery>]\r\n \
-                [--prjMetrics=<fileMetrics>]\r\n \
+                [--prjMetrics=<prjMetrics>]\r\n \
                 [--fileMetrics=<fileMetrics>]\r\n \
                 [--classMetrics=<classMetrics>]\r\n \
                 [--routineMetrics=<routineMetrics>]\r\n \
@@ -241,14 +241,16 @@ def main():
 
 
     prj_metric_names = [metric.strip() for metric in arguments["--prjMetrics"].split(",")]
+    prj_metric_names = [metric for metric in prj_metric_names if len(metric)>0 ]
     all_metric_names, all_metric_values_before, all_metric_values_after, all_growth_rates = collect_metric_names_with_values_and_growth(
         db_after, db_before, prj_metric_names)
     output_dir = arguments["--outputDir"]
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
     absolute_file_name = "%s%s%s" % (output_dir, os.sep, file_name)
-    saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, absolute_file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
-    if saved_file_name is not None:
-        print("Saved %s" % saved_file_name)
+    if len (all_metric_names) > 0:
+        saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, absolute_file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
+        if saved_file_name is not None:
+            print("Saved %s" % saved_file_name)
     print_growth_rates(all_metric_names, all_growth_rates)
     rates_by_adjusted_metric_name = {"Prj %s growth rate" % metric_name : rate for metric_name, rate in zip (all_metric_names, all_growth_rates)}
     absolute_csv_path = "%s%s%s" % (output_dir, os.sep, arguments["--outputCSV"])

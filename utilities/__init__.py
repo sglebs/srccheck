@@ -1,1 +1,1 @@
-VERSION = "0.1.25" # adds --outputDir support
+VERSION = "0.1.26" # srcdiffplot can take empty CSV
