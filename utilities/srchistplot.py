@@ -2,6 +2,7 @@
 
 Usage:
   srchistplot   --in=<inputUDB> \r\n \
+                [--outputDir=<path to dir where to save files>] \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
                 [--fileQuery=<fileQuery>]\r\n \
@@ -38,6 +39,7 @@ Options:
   -l, --logarithmic                             If you want logarithmic y scale. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero[default: false]
   -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
+  --outputDir=<path>                            Where files should be generated. [default: .]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -91,9 +93,11 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
         metric_values_as_list = [value for value in metric_values()]
         max_value = max(metric_values_as_list) if len(metric_values_as_list)>0 else 0
         #bin_count = max (10, int (20 * math.log(abs(1+max_value),10)))
+        output_dir = cmdline_arguments["--outputDir"]
+        file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(db.name())[-1])
         file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                    bool(cmdline_arguments["--logarithmic"]),
-                                   os.path.split(db.name())[-1],
+                                   file_prefix,
                                    max_value,
                                    metric,
                                    metric_values_as_list,

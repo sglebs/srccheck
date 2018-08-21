@@ -2,6 +2,7 @@
 
 Usage:
   csvscatterplot    --in=<inputCSV> \r\n \
+                   [--outputDir=<path to dir where to save files>] \r\n \
                    [--xMetric=<columnName>] \r\n \
                    [--yMetric=<columnName>] \r\n \
                    [--ballMetric=<columnName>] \r\n \
@@ -20,6 +21,7 @@ Options:
   --ballSizeMax=<aNumber>     Maximum size of each ball drawn [default: 4000]
   --ballSizeRate=<aNumber>    Rate of growth of the ball for unit of growth of ballMetric [default: 10]
   --entityNames=<columnName>  Name of the column in the CSV for names in the circles [default: Component]
+  --outputDir=<path>          Where files should be generated. [default: .]
 
 
 Author:
@@ -61,8 +63,10 @@ def scatter_plot (cmdline_arguments,
             y_values.append(y_metric_value)
             ball_values.append(min(ball_size_max,ball_size_rate * ball_metric_value + ball_size_min))
             color_values.append(0) #TODO: code a column with colors
+    output_dir = cmdline_arguments["--outputDir"]
+    file_prefix = "%s%s%s" % (output_dir, os.sep, "csv")
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
-                             color_values, entity_column_name, annotations, "csv", "")
+                             color_values, entity_column_name, annotations, file_prefix, "")
     print("Saved %s" % file_name)
     return True
 

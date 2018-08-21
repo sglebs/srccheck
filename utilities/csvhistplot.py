@@ -2,6 +2,7 @@
 
 Usage:
   csvhistplot   --in=<inputCSV> \r\n \
+                [--outputDir=<path to dir where to save files>] \r\n \
                 [--histogramColumn=<columnName>] \r\n \
                 [--logarithmic]  \r\n \
                 [--showMeanMedian]
@@ -12,6 +13,7 @@ Options:
     --histogramColumn=<columnName>      Name of the column in the CSV with the Normalized Distance values. [default: Distance Percentage]
     -m, --showMeanMedian                If you want to show dotted lines for mean (blue) and median (red) [default: false]
     -l, --logarithmic                   If you want logarithmic y scale. [default: false]
+    --outputDir=<path>                  Where files should be generated. [default: .]
 
 
 Author:
@@ -40,9 +42,11 @@ def hist_plot (cmdline_arguments):
             data_values.append(data_value)
 
     max_value = max(data_values) if len(data_values) > 0 else 0
+    output_dir = cmdline_arguments["--outputDir"]
+    file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(cmdline_arguments["--in"])[-1])
     file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                                      bool(cmdline_arguments["--logarithmic"]),
-                                                     os.path.split(cmdline_arguments["--in"])[-1],
+                                                     file_prefix,
                                                      max_value,
                                                      histogram_column,
                                                      data_values,

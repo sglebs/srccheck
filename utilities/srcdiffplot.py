@@ -2,6 +2,7 @@
 
 Usage:
   srcdiffplot   --before=<inputUDB> --after=<inputUDB> \r\n \
+                [--outputDir=<path to dir where to save files>] \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
                 [--fileQuery=<fileQuery>]\r\n \
@@ -52,6 +53,7 @@ Options:
   --sonarUser=<sonarUser>                       User name for Sonar authentication [default: admin]
   --sonarPass=<sonarPass>                       Password for Sonar authentication [default: admin]
   --outputCSV=<outputCSV>                       Output CSV file path with the prj growth ratios for metrics listed at --maxPrjMetrics. Useful with the Jenkins/Plot plugin [default: diffmetrics.csv]
+  --outputDir=<path>                            Where files should be generated. [default: .]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -169,12 +171,14 @@ def plot_diff_generic_metrics (db_before, db_after, cmdline_arguments, metrics_a
             colors = ["r" if y > x else "g" for x,y in zip(all_before,all_after)]
             if bool(cmdline_arguments["--showMeanMedian"]):
                 add_stats(all_before, all_after, entity_names, colors)
+            output_dir = cmdline_arguments["--outputDir"]
+            file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-" + metric_name)
             file_name = save_scatter(all_before, "Before",
                                      all_after, "After",
                                      int(cmdline_arguments["--ballSize"]), metric_name,
                                      colors, "Increased/Decreased",
                                      entity_names,
-                                     os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-" + metric_name,
+                                     file_prefix,
                                      scope_name,
                                      show_diagonal=True,
                                      format="html")
@@ -239,17 +243,20 @@ def main():
     prj_metric_names = [metric.strip() for metric in arguments["--prjMetrics"].split(",")]
     all_metric_names, all_metric_values_before, all_metric_values_after, all_growth_rates = collect_metric_names_with_values_and_growth(
         db_after, db_before, prj_metric_names)
+    output_dir = arguments["--outputDir"]
     file_name = os.path.split(db_before.name())[-1] + "-" + os.path.split(db_after.name())[-1] + "-diff-kiviat.png"
-    saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
+    absolute_file_name = "%s%s%s" % (output_dir, os.sep, file_name)
+    saved_file_name = save_kiviat_with_values_and_thresholds(all_metric_names, all_metric_values_after, all_metric_values_before, absolute_file_name, "Prj Metrics", thresholdslabel="before", valueslabel="after")
     if saved_file_name is not None:
         print("Saved %s" % saved_file_name)
     print_growth_rates(all_metric_names, all_growth_rates)
     rates_by_adjusted_metric_name = {"Prj %s growth rate" % metric_name : rate for metric_name, rate in zip (all_metric_names, all_growth_rates)}
-    csv_ok = save_csv(arguments["--outputCSV"], rates_by_adjusted_metric_name)
+    absolute_csv_path = "%s%s%s" % (output_dir, os.sep, arguments["--outputCSV"])
+    csv_ok = save_csv(absolute_csv_path, rates_by_adjusted_metric_name)
     if csv_ok:
-        print("+++ Growth ratio metrics saved to %s" % arguments["--outputCSV"])
+        print("+++ Growth ratio metrics saved to %s" % absolute_csv_path)
     else:
-        print("\n*** Problems creating CSV file %s" % arguments["--outputCSV"])
+        print("\n*** Problems creating CSV file %s" % absolute_csv_path)
     post_metrics_to_sonar(arguments, rates_by_adjusted_metric_name)
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")

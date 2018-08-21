@@ -2,6 +2,7 @@
 
 Usage:
   srcscatterplot    --in=<inputUDB> \r\n \
+                    [--outputDir=<path to dir where to save files>] \r\n \
                     [--dllDir=<dllDir>]\r\n \
                     [--skipLibs=<skipLibs>]\r\n \
                     [--fileQuery=<fileQuery>]\r\n \
@@ -28,6 +29,7 @@ Options:
   --config=<jsonOrJsonFile>                     A json which configures the plots for the supported scopes (File, Class, Routine). [default: {"File":[{"xMetric":"CountLineCode", "yMetric":"MaxCyclomaticModified", "ballMetric":"MaxNesting"}], "Class":[{"xMetric":"CountLineCode", "yMetric":"CountClassCoupled", "ballMetric":"PercentLackOfCohesion"}], "Routine":[{"xMetric":"CountLineCode", "yMetric":"CyclomaticModified", "ballMetric":"MaxNesting"}]}]
   -v, --verbose                                 If you want lots of messages printed. [default: false]
   -z, --skipZeroes                              If you want to skip datapoints which are zero [default: false]
+  --outputDir=<path>                            Where files should be generated. [default: .]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -108,8 +110,10 @@ def scatter_plot (db, cmdline_arguments,
         y_values.append(y_metric_value)
         ball_values.append(min(ball_size_max,ball_size_rate * ball_metric_value + ball_size_min))
         color_values.append(0 if container_file is None else hash(os.path.dirname(container_file.longname())))
+    output_dir = cmdline_arguments["--outputDir"]
+    file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(db.name())[-1])
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
-                             color_values, "directory", annotations, os.path.split(db.name())[-1], scope_name)
+                             color_values, "directory", annotations, file_prefix, scope_name)
     print("Saved %s" % file_name)
     return True
 

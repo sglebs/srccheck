@@ -2,6 +2,7 @@
 
 Usage:
   srccheck       --in=<inputUDB> \r\n \
+                [--outputDir=<path to dir where to save files>] \r\n \
                 [--dllDir=<dllDir>]\r\n \
                 [--skipLibs=<skipLibs>]\r\n \
                 [--fileQuery=<fileQuery>]\r\n \
@@ -58,6 +59,7 @@ Options:
   -m, --showMeanMedian                          If you want to show dotted lines for mean (blue) and median (red) [default: false]
   -s, --showHighest                             If you want to show (print) the highest valued elements (highest metric) even if not a violation. [default: false]
   --skipPrjMetrics=<skipPrjMetrics>             Skip these project metrics (CSV of values) when printing/processing all prj metrics (for speed) [default: CountDeclMethodAll,MaxInheritanceTree,Essential,MaxEssential,MaxEssentialKnots,MaxNesting]
+  --outputDir=<path>                            Where files should be generated. [default: .]
 
 Errors:
   DBAlreadyOpen        - only one database may be open at once
@@ -146,7 +148,7 @@ def process_prj_metrics (cmdline_arguments, prj_metrics):
         max_metrics = {}
     if len(max_metrics) == 0: # No metrics passed in
         print ("*** EMPTY PRJ Max Metrics. JSON error? (%s)" % max_metrics_json)
-        return [0, {}]
+        return [0, {}, {}]
     max_metrics_found = {}
     for metric,max_value in max_metrics.items():
         cur_value = prj_metrics.get(metric, None)
@@ -265,9 +267,11 @@ def process_generic_metrics (db, cmdline_arguments, jsonCmdLineParam, entityQuer
                     print("INFO(STATS): %s = %s (violation threshold is %s):" % (metric, stats_value, max_allowed_value))
                     print("...........................................")
         if save_histograms and len(all_values) > 0 and lambda_stats is None:
+            output_dir = cmdline_arguments["--outputDir"]
+            file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(db.name())[-1])
             file_name, mean, median, pstdev = save_histogram(bool(cmdline_arguments["--showMeanMedian"]),
                                        bool(cmdline_arguments["--logarithmic"]),
-                                       os.path.split(db.name())[-1],
+                                       file_prefix,
                                        max_value_found,
                                        metric,
                                        all_values,
@@ -376,14 +380,16 @@ def main():
     append_dict_with_key_prefix (max_metrics, file_max_metrics, "File")
     append_dict_with_key_prefix (max_metrics, class_max_metrics, "Class")
     append_dict_with_key_prefix (max_metrics, routine_max_metrics, "Routine")
-
-    file_name = save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, os.path.split(db.name())[-1])
+    output_dir = arguments["--outputDir"]
+    file_prefix = "%s%s%s" % (output_dir, os.sep, os.path.split(db.name())[-1])
+    file_name = save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, file_prefix)
     print("Kiviat saved to %s"% file_name)
-    csv_ok = save_csv(arguments["--outputCSV"], tracked_metrics)
+    absolute_csv_path = "%s%s%s" % (output_dir, os.sep, arguments["--outputCSV"])
+    csv_ok = save_csv(absolute_csv_path, tracked_metrics)
     if csv_ok:
-        print("+++ Metrics saved to %s" % arguments["--outputCSV"])
+        print("+++ Metrics saved to %s" % absolute_csv_path)
     else:
-        print ("\n*** Problems creating CSV file %s" % arguments["--outputCSV"])
+        print ("\n*** Problems creating CSV file %s" % absolute_csv_path)
 
     post_metrics_to_sonar(arguments, tracked_metrics)
     print ("")
