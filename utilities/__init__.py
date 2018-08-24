@@ -1,1 +1,1 @@
-VERSION = "0.1.26" # srcdiffplot can take empty CSV
+VERSION = "0.2" # added jd2csv
