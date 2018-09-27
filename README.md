@@ -26,7 +26,7 @@ generate the CSV file that this plugin requires (see our --outputCSV= command-li
 For a radial (kiviat) view of the current values and the max values of the metrics, the script also outputs a png
 with the same name as the UDB file (just different file extension). Here is an example:
 
-![Kivit of current values and max values](example-kiviat.png)
+![Kivit of current values and max values](imgs/example-kiviat.png)
 
 If the green values are higher, you are ok. If the orange values are higher, you blew past the maximum allowed value for the metric.
 
@@ -234,7 +234,7 @@ srchistplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Us
 
 One of the files that the line above will output will look like this:
 
-![CyclomaticStrict for Django functions](example-django.png)
+![CyclomaticStrict for Django functions](imgs/example-django.png)
 
 Scatter Plots
 =============
@@ -263,7 +263,7 @@ Here's an example for Django sources, using the defaults:
 srcscatterplot --dllDir=/Applications/Understand.app/Contents/MacOS/Python --in=/Users/mqm/Downloads/django.udb
 ```
 
-![scatter plot for Django functions](example2-django.png)
+![scatter plot for Django functions](imgs/example2-django.png)
 
 The plot will be an html file, interactive - you can roll your mouse on a circle
 and it will show which element that is. (Not above - that's a screenshot).
@@ -302,7 +302,7 @@ and Complexity (circle colors in the graph).
 
 The result should look like the graph below.
 
-![Instability plot for a project](example-instability.png)
+![Instability plot for a project](imgs/example-instability.png)
 
 If you roll the mouse on the circles, their names are shown, as well as the metrics that represent the circle size and
 the circle color. Run the utility with -h for a detailed description of the parameters.
@@ -314,7 +314,7 @@ an XML with the data using JDepend and convert from it to a CSV using the includ
 Considering that the bigger the distance from the mean diagonal line the worse the situation, you may want to visualize
 the distances in a histogram, to properly prioritize the refactorings. A sample histogram can be seen below:
 
-![Instability histogram for a project](example-instability-histogram.png)
+![Instability histogram for a project](imgs/example-instability-histogram.png)
 
 It was generated as follows:
 
@@ -347,7 +347,7 @@ from JUnit 4.9 to 4.12. If the metric increased, it will be in red and above the
 If the metric decreased, it will be in green and below the diagonal. If you hover on
 the circles it will show the name of the element (not active below - it's just a screenshot).
 
-![Diff plot for JUnit](example-diff.png)
+![Diff plot for JUnit](imgs/example-diff.png)
 
 The plot was generated like this:
 
@@ -376,7 +376,7 @@ und analyze ../after.udb
 
 A kiviat is also generated, for project metrics: use the --prjMetrics parameter. In the case of comparing jUnit 4.9 against 4.12, we get this kiviat:
 
-![Diff kiviat](example-kiviat-diff.png)
+![Diff kiviat](imgs/example-kiviat-diff.png)
 
 The tool will also print project growth rates for the metrics you selected with the --prjMetrics parameter. Example:
 
