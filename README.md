@@ -185,10 +185,10 @@ We use the stats functions in https://docs.python.org/3/library/statistics.html 
 Synthetic Metrics
 =================
 
-There are currently 2 synthetic metrics not directly supported by Undedrstand but supported by srccheck:
+There are currently 2 synthetic metrics not directly supported by Understand but supported by srccheck:
 
  * *CountParams* : Valid for functions/methods/routines. Represents the number of parameters declared as input to a method / function.
- * *CountDeclMethodNonStub* : See #39. Valid for methods. Represents the number of methods declared in a class excluding getters/setters and stubs alike
+ * *CountDeclMethodNonStub* : See #39. Valid for methods. Represents the number of methods declared in a class excluding getters/setters and stubs alike.
 
 Adaptive KALOI
 ==============
