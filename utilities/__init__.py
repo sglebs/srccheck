@@ -1,1 +1,1 @@
-VERSION = "0.2" # added jd2csv
+VERSION = "0.2.1" # Fixes #74
