@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'docopt==0.6.2',
         'requests==2.10.0',
-        'matplotlib==1.5.3',
+        'matplotlib==2.2.4',
         'Jinja2==2.8',
         'mpld3==0.3'
     ],

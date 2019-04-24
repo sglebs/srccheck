@@ -327,49 +327,49 @@ def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
     sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
-    print ("\r\n====== srccheck by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== srccheck by Marcio Marchini: marcio@BetterDeveloper.net ==========")
     print(arguments)
     try:
         import understand
-    except:
-        print ("Can' find the Understand DLL. Use --dllDir=...")
-        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
+    except Exception as e:
+        print("Can' find the Understand DLL (%s).\r\nUse --dllDir=..." % getattr(e, 'message', repr(e)))
+        print("Please also set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
         sys.exit(-1)
     try:
         db = understand.open(arguments["--in"])
     except understand.UnderstandError as exc:
-        print ("Error opening input file: %s" % exc)
+        print("Error opening input file: %s" % exc)
         sys.exit(-2)
 
     adaptive = arguments.get("--adaptive", False)
-    print ("\r\n====== Project Metrics (%s) (%s) ==========" % (db.name(), db.language()[0]))
+    print("\r\n====== Project Metrics (%s) (%s) ==========" % (db.name(), db.language()[0]))
     prj_metrics = project_metrics(db, arguments)
     print_prj_metrics(prj_metrics)
-    print ("")
-    print ("\r\n====== Project Metrics that failed the filters  ===========")
+    print("")
+    print("\r\n====== Project Metrics that failed the filters  ===========")
     [total_violation_count , prj_tracked_metrics, prj_max_metrics ] = process_prj_metrics(arguments, prj_metrics)
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxPrjMetrics", False), prj_tracked_metrics)
-    print ("")
-    print ("\r\n====== File Metrics that failed the filters  ===========")
+    print("")
+    print("\r\n====== File Metrics that failed the filters  ===========")
     [violation_count, file_tracked_metrics, file_max_metrics ] = process_file_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxFileMetrics"), file_tracked_metrics)
-    print ("")
-    print ("\r\n====== Class Metrics that failed the filters  ==========")
+    print("")
+    print("\r\n====== Class Metrics that failed the filters  ==========")
     [violation_count, class_tracked_metrics, class_max_metrics ] = process_class_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxClassMetrics"), class_tracked_metrics)
-    print ("")
-    print ("\r\n====== Routine Metrics that failed the filters ==========")
+    print("")
+    print("\r\n====== Routine Metrics that failed the filters ==========")
     [violation_count, routine_tracked_metrics, routine_max_metrics ] = process_routine_metrics(db, arguments)
     total_violation_count = total_violation_count + violation_count
     if adaptive:
         write_metrics_thresholds(arguments.get("--maxRoutineMetrics"), routine_tracked_metrics)
-    print ("")
-    print ("\r\n====== Publishing selected metrics  ===========")
+    print("")
+    print("\r\n====== Publishing selected metrics  ===========")
     tracked_metrics = {}
     append_dict_with_key_prefix (tracked_metrics, prj_tracked_metrics, "Prj")
     append_dict_with_key_prefix (tracked_metrics, file_tracked_metrics, "File")
@@ -389,17 +389,17 @@ def main():
     if csv_ok:
         print("+++ Metrics saved to %s" % absolute_csv_path)
     else:
-        print ("\n*** Problems creating CSV file %s" % absolute_csv_path)
+        print("\n*** Problems creating CSV file %s" % absolute_csv_path)
 
     post_metrics_to_sonar(arguments, tracked_metrics)
-    print ("")
+    print("")
     end_time = datetime.datetime.now()
-    print ("\r\n--------------------------------------------------")
-    print ("Started : %s" % str(start_time))
-    print ("Finished: %s" % str(end_time))
-    print ("Total: %s" % str(end_time-start_time))
-    print ("Violations: %i" % total_violation_count)
-    print ("--------------------------------------------------")
+    print("\r\n--------------------------------------------------")
+    print("Started : %s" % str(start_time))
+    print("Finished: %s" % str(end_time))
+    print("Total: %s" % str(end_time-start_time))
+    print("Violations: %i" % total_violation_count)
+    print("--------------------------------------------------")
     db.close()
     sys.exit(total_violation_count)
 
