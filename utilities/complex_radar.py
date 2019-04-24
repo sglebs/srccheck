@@ -2,7 +2,7 @@
 import numpy as np
 
 AX_MIN_VALUE = 0.1
-AX_MAX_VALUE = 0.8
+AX_MAX_VALUE = 0.7  # leave extra room for axis labels that may be long
 
 
 def _invert(x, limits):
@@ -19,21 +19,41 @@ def _scale_data(data, ranges):
 
 class ComplexRadar():
     def __init__(self, fig, variables, ranges,
-                 n_ordinate_levels=6, precision=2, textsize="smaller", numberssize="smaller", textposrate=1.11, textposrotation=60):
+                 n_ordinate_levels=6, precision=2, textsize="smaller", numberssize="smaller", textposrate=1.08, textposrotation=60):
         angles = np.arange(0, 360, 360./len(variables))
 
         axes = [fig.add_axes([AX_MIN_VALUE,AX_MIN_VALUE,AX_MAX_VALUE,AX_MAX_VALUE],polar=True,
                 label = "axes{}".format(i))
                 for i in range(len(variables))]
+        #mqm - apparently axes[0] is the circle perimeter, with the var names
         l, text = axes[0].set_thetagrids(angles,
                                          labels=variables,
                                          #frac=textposrate,
+                                         horizontalalignment='left',
+                                         position=(0.1,1-textposrate),
                                          size=textsize)
-        [txt.set_rotation(angle-textposrotation) for txt, angle
-             in zip(text, angles)]
+
+        #Rotation is a mistery in newer versions of matplotlib
+
+        #works but same value for all. Useless
+        #axes[0].tick_params(axis='x', labelrotation=60)
+
+        #does not work
+        #[txt.set_rotation(angle-textposrotation) for txt, angle in zip(text, angles)]
+
+        #does not work
+        #locs, labels = axes[0].get_xticks()
+        #[label.set_rotation(180) for label in labels]
+
+        #does not work
+        #for label,angle in zip (axes[0].get_xticklabels(), angles): # https://stackoverflow.com/questions/43152502/how-can-i-rotate-xticklabels-in-matplotlib-so-that-the-spacing-between-each-xtic
+        #    #label.set_ha("left") # works
+        #    label.set_rotation(angle-textposrotation) # does not work
+
+
         for ax in axes[1:]:
             ax.patch.set_visible(False)
-            ax.grid("off")
+            ax.grid(False)
             ax.xaxis.set_visible(False)
         for i, ax in enumerate(axes):
             grid = np.linspace(*ranges[i],
@@ -51,6 +71,7 @@ class ComplexRadar():
                          angle=angles[i], size=numberssize)
             #ax.spines["polar"].set_visible(False)
             ax.set_ylim(*adjusted_range[i])
+
         # variables for plotting
         self.angle = np.deg2rad(np.r_[angles, angles[0]])
         self.ranges = ranges
