@@ -81,7 +81,8 @@ def stream_of_entity_with_metrics (entities, metrics, verbose, skipLibraries,reg
             metric_dict ["CountParams"] = len(entity.ents("Define", "Parameter ~Catch"))
         if "CountDeclMethodNonStub" in metric_dict:
             extra_metrics = entity.metric(["CountDeclMethod" , "CountDeclPropertyAuto"])
-            metric_dict["CountDeclMethodNonStub"] = max(0,extra_metrics.get("CountDeclMethod",0) - (2 * extra_metrics.get("CountDeclPropertyAuto",0))) # note we can't always multiply by 2 (not always a getter and setter) but this is the best we can do
+            metric_dict["CountDeclMethodNonStub"] = max(0,extra_metrics.get("CountDeclMethod",0) -
+                                                        (2 * int(extra_metrics.get("CountDeclPropertyAuto",0) or 0))) # note we can't always multiply by 2 (not always a getter and setter) but this is the best we can do
         yield [entity, container_file, metric_dict]
 
 
