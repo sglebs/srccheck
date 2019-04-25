@@ -50,7 +50,7 @@ def jdepend_to_csv (xml_path, csv_path):
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    print("\r\n====== jdepend to CSV by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== jdepend to CSV @ https://github.com/sglebs/srccheck ==========")
     print(arguments)
     jdepend_to_csv (arguments["--in"], arguments["--outputCSV"] )
     print("")

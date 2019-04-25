@@ -74,7 +74,7 @@ def scatter_plot (cmdline_arguments,
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    print("\r\n====== csvscatterplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== csvscatterplot @ https://github.com/sglebs/srccheck ==========")
     print("Processing %s" % arguments["--in"])
     ok = scatter_plot(arguments,
                       arguments["--xMetric"],

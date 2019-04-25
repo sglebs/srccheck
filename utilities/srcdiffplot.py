@@ -30,7 +30,7 @@ Usage:
 Options:
   --before=<inputUDB>                           File path to a UDB with the "before" state of your sources
   --after=<inputUDB>                            File path to a UDB with the "after" state of your sources
-  --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
+  --dllDir=<dllDir>                             Path to the dir with the Understand bin and DLLs.[default: C:/Program Files/SciTools/bin/pc-win64]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
@@ -76,7 +76,8 @@ import sys
 from docopt import docopt
 
 from utilities import VERSION
-from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds, post_metrics_to_sonar, save_csv
+from utilities.utils import stream_of_entity_with_metrics, save_scatter, save_kiviat_with_values_and_thresholds, \
+    post_metrics_to_sonar, save_csv, insert_understand_in_path
 
 
 def plot_diff_file_metrics (db_before, db_after, cmdline_arguments):
@@ -214,20 +215,16 @@ def collect_metric_names_with_values_and_growth(db_after, db_before, prj_metric_
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    dllDir = arguments["--dllDir"]
-    sys.path.insert(0,dllDir) # add the dir with the DLLs - Qt etc
-    os.environ["PATH"] = dllDir + os.pathsep + os.environ["PATH"] # prepend
-    sys.path.insert(0,os.path.join(dllDir,"Python")) # also needed, For interop
-    sys.path.insert(0,os.path.join(dllDir,"python")) # also needed, For interop with older versions of Understand (which used lowercase)
-    #hangs!!!!! os.environ["PYTHONPATH"] = os.path.join(dllDir,"python") + os.pathsep + os.environ.get("PYTHONPATH", "") # prepend
 
-    print ("\r\n====== srcdiffplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    insert_understand_in_path(arguments["--dllDir"])
+
+    print ("\r\n====== srcdiffplot @ https://github.com/sglebs/srccheck ==========")
     print(arguments)
     try:
         import understand
     except:
         print ("Can' find the Understand DLL. Use --dllDir=...")
-        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
+        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64 or equivalent")
         sys.exit(-1)
     try:
         db_before = understand.open(arguments["--before"])
@@ -274,9 +271,6 @@ def main():
     print("--------------------------------------------------")
     db_before.close()
     db_after.close()
-
-
-
 
 
 if __name__ == '__main__':

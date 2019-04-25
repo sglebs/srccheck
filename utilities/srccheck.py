@@ -33,7 +33,7 @@ Usage:
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
-  --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
+  --dllDir=<dllDir>                             Path to the dir with the Understand bin and DLLs.[default: C:/Program Files/SciTools/bin/pc-win64]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
@@ -94,7 +94,7 @@ from docopt import docopt
 from utilities import VERSION
 from utilities.utils import stream_of_entity_with_metric, save_histogram, save_csv, \
     save_kiviat_with_values_and_thresholds, \
-    post_metrics_to_sonar, load_metrics_thresholds
+    post_metrics_to_sonar, load_metrics_thresholds, insert_understand_in_path
 
 STATS_LAMBDAS = {"AVG": statistics.mean,
                  "MEDIAN": statistics.median,
@@ -326,14 +326,16 @@ def save_kiviat_of_metrics(tracked_metrics, max_metrics, arguments, filename_pre
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
-    print ("\r\n====== srccheck by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+
+    insert_understand_in_path(arguments["--dllDir"])
+
+    print ("\r\n====== srccheck @ https://github.com/sglebs/srccheck ==========")
     print(arguments)
     try:
         import understand
     except:
         print ("Can' find the Understand DLL. Use --dllDir=...")
-        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
+        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64 or equivalent")
         sys.exit(-1)
     try:
         db = understand.open(arguments["--in"])

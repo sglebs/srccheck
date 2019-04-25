@@ -155,7 +155,7 @@ def write_metrics_thresholds(json_path, new_max_metrics):
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    print("\r\n====== csvkaloi by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== csvkaloi @ https://github.com/sglebs/srccheck ==========")
     print(arguments)
 
     adaptive = arguments.get("--adaptive", False)

@@ -1,1 +1,1 @@
-VERSION = "0.2.2" # Fixes #8 ContDeclMethonNonStub
+VERSION = "0.2.3" # Fixes #77 --undDir not working

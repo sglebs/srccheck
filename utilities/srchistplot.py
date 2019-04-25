@@ -23,7 +23,7 @@ Usage:
 
 Options:
   --in=<inputUDB>                               Input UDB file path.
-  --dllDir=<dllDir>                             Path to the dir with the DLL to the Understand Python SDK.[default: C:/Program Files/SciTools/bin/pc-win64/python]
+  --dllDir=<dllDir>                             Path to the dir with the Understand bin and DLLs.[default: C:/Program Files/SciTools/bin/pc-win64]
   --skipLibs=<skipLibs>                         false for full analysis. true if you want to skip libraries you import. [default: true]
   --fileQuery=<fileQuery>                       Kinds of files you want to traverse[default: file ~Unknown ~Unresolved]
   --classQuery=<classQuery>                     Kinds of classes your language has. [default: class ~Unknown ~Unresolved, interface ~Unknown ~Unresolved]
@@ -58,7 +58,7 @@ import datetime
 import sys
 import os
 from docopt import docopt
-from utilities.utils import stream_of_entity_with_metric, save_histogram
+from utilities.utils import stream_of_entity_with_metric, save_histogram, insert_understand_in_path
 from utilities import VERSION
 
 
@@ -108,14 +108,14 @@ def plot_hist_generic_metrics (db, cmdline_arguments, metrics_as_string, entityQ
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    sys.path.append(arguments["--dllDir"]) # add the dir with the DLL to interop with understand
-    print ("\r\n====== srchistplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    insert_understand_in_path(arguments["--dllDir"])
+    print ("\r\n====== srchistplot @ https://github.com/sglebs/srccheck ==========")
     print(arguments)
     try:
         import understand
     except:
         print ("Can' find the Understand DLL. Use --dllDir=...")
-        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64/python or equivalent")
+        print ("Please set PYTHONPATH to point an Understand's C:/Program Files/SciTools/bin/pc-win64 or equivalent")
         sys.exit(-1)
     try:
         db = understand.open(arguments["--in"])

@@ -10,6 +10,16 @@ from matplotlib import pyplot as plt
 plt.ioff()  # fixes #32 - no need for an interactive backend
 import mpld3
 from utilities.complex_radar import ComplexRadar
+import sys
+
+def insert_understand_in_path(dllDir):
+    sys.path.insert(0, dllDir)  # add the dir with the DLLs - Qt etc
+    os.environ["PATH"] = dllDir + os.pathsep + os.environ["PATH"]  # prepend
+    sys.path.insert(0, os.path.join(dllDir, "Python"))  # also needed, For interop
+    sys.path.insert(0, os.path.join(dllDir,
+                                    "python"))  # also needed, For interop with older versions of Understand (which used lowercase)
+    # hangs!!!!! os.environ["PYTHONPATH"] = os.path.join(dllDir,"python") + os.pathsep + os.environ.get("PYTHONPATH", "") # prepend
+
 
 class ClickSendToBack(mpld3.plugins.PluginBase):
     """Plugin for sending element to the back. Combined https://mpld3.github.io/notebooks/custom_plugins.html and http://bl.ocks.org/eesur/4e0a69d57d3bfc8a82c2"""

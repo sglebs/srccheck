@@ -76,7 +76,7 @@ def scatter_plot (cmdline_arguments):
 def main():
     start_time = datetime.datetime.now()
     arguments = docopt(__doc__, version=VERSION)
-    print("\r\n====== srcinstplot by Marcio Marchini: marcio@BetterDeveloper.net ==========")
+    print("\r\n====== srcinstplot @ https://github.com/sglebs/srccheck ==========")
     print("Processing %s" % arguments["--in"])
     scatter_plot(arguments)
     end_time = datetime.datetime.now()
