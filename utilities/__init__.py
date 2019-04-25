@@ -1,1 +1,1 @@
-VERSION = "0.2.1" # Fixes #74
+VERSION = "0.2.2" # Fixes #8 ContDeclMethonNonStub
