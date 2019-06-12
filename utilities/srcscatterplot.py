@@ -105,6 +105,7 @@ def scatter_plot (db, cmdline_arguments,
             ball_metric_value = 0
         if x_metric_value < float(x_metric_min_value) and y_metric_value < float(y_metric_min_value) and ball_metric_value < float(ball_metric_min_value):
             continue # fix for #59 - able to toss uninteresting elements out
+        entity_name += ": "  + str(ball_metric_value)
         annotations.append(entity_name)
         x_values.append(x_metric_value)
         y_values.append(y_metric_value)
