@@ -1,13 +1,18 @@
 """XML KALOI (Keep a Lid On It).
 
 Usage:
-  xmlkaloi      --in=<inputXML> [--maxMetrics=<maxPrjMetrics>] [--xpathForEachMetric=<xpaths>] [--adaptive]
+  xmlkaloi      --in=<inputXML> [--maxMetrics=<maxPrjMetrics>] [--xpathForEachMetric=<xpaths>] [--adaptive] [--sonarURL=<sonarURL>] [--sonarPrj=<sonarPrj>] [--sonarUser=<sonarUser>] [--sonarPass=<sonarPass>]
+
 
 Options:
   --in=<inputXML>                     Input XML file path. [default: summary.xml]
   --maxMetrics=<maxPrjMetrics>        A JSON dictionary containing max values for the metrics you want to limit. [default: {"XS":0.15, "FAT": 0.15, "TANGLE": 0.10}]
   --xpathForEachMetric=<xpaths>       xpaths to fetch each of the current values provided in maxMetrics. [default: {"XS":"model/hiview/xs-config/xs-summary/summary@average-xs","FAT":"model/hiview/stats/codemap_stats@complexity_percentage","TANGLE":"model/hiview/stats/codemap_stats@tanglicity_percentage"}]
   -a, --adaptive                      If you want xmlkaloi to be adaptive and update the input json files with current max values
+  --sonarURL=<sonarURL>               URL to post metrics into Sonar [default: http://localhost:9000/api/manual_measures]
+  --sonarPrj=<sonarPrj>               Name of Project in Sonar [default: #]
+  --sonarUser=<sonarUser>             User name for Sonar authentication [default: admin]
+  --sonarPass=<sonarPass>             Password for Sonar authentication [default: admin]
 
 
 Author:
@@ -26,6 +31,7 @@ from docopt import docopt
 from utilities import VERSION
 import xml.etree.ElementTree as ET
 import re
+from utilities.utils import post_metrics_to_sonar
 
 def load_xml(xml_path):
     xml_root = None
@@ -100,6 +106,7 @@ def main():
     print ("%s  (Current values: %s)" % (violators, current_values))
     if adaptive:
         write_json(arguments.get("--maxMetrics", False), current_values)
+    post_metrics_to_sonar(arguments, current_values)
     end_time = datetime.datetime.now()
     print("\r\n--------------------------------------------------")
     print("Started : %s" % str(start_time))
