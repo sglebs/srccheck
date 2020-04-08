@@ -1,1 +1,1 @@
-VERSION = "0.2.7" # Fixes #77 --undDir not working
+VERSION = "0.2.8" # Fixes #86 xmlkaloi in scriptsß
