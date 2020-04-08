@@ -26,6 +26,7 @@ setup(
             'srcdiffplot = utilities.srcdiffplot:main',
             'csvkaloi = utilities.csvkaloi:main',
             'jd2csv = utilities.jd2csv:main',
+            'xmlkaloi = utilities.xmlkaloi:main',
         ],
     }
 )
