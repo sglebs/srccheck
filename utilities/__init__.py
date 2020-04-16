@@ -1,1 +1,1 @@
-VERSION = "0.2.8" # Fixes #86 xmlkaloi in scriptsß
+VERSION = "0.3.0" # Fixes #89 xmlkaloi in scriptsß
