@@ -14,7 +14,7 @@ setup(
         'requests==2.10.0',
         'matplotlib==2.2.4',
         'Jinja2==2.8',
-        'mpld3==0.3'
+        'mpld3==0.5.1'
     ],
     entry_points={
         'console_scripts': [
