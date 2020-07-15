@@ -62,8 +62,14 @@ NOTE: you can also break your build using SONAR's [Build Breaker Plugin](https:/
 How to Install srccheck
 =======================
 
-Make sure your Python has paver installed (pip3 install paver) and then run:
+If on Windows, do this first:
+ * Download install the windows-specific distribution of Mattplotlib 2.2.4 from https://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib
+   * We tested this with: pip3 install "c:\temp\Downloads\matplotlib-2.2.4-cp37-cp37m-win_amd64.whl"
+
+Now install paver and then srccheck:
+
 ```
+pip3 install paver
 pip3 install git+https://github.com/sglebs/srccheck
 ```
 

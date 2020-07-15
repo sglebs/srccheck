@@ -1,1 +1,1 @@
-VERSION = "0.3.0" # Fixes #89 xmlkaloi in scriptsß
+VERSION = "0.3.1" # Fixes #81 Windows install
