@@ -7,6 +7,7 @@ Usage:
                    [--yMetric=<columnName>] \r\n \
                    [--ballMetric=<columnName>] \r\n \
                    [--entityNames=<columnName>] \r\n \
+                   [--colors=<columnName>] \r\n \
                    [--ballSizeMin=<aNumber>] \r\n \
                    [--ballSizeMax=<aNumber>] \r\n \
                    [--ballSizeRate=<aNumber>] \r\n \
@@ -21,6 +22,7 @@ Options:
   --ballSizeMax=<aNumber>     Maximum size of each ball drawn [default: 4000]
   --ballSizeRate=<aNumber>    Rate of growth of the ball for unit of growth of ballMetric [default: 10]
   --entityNames=<columnName>  Name of the column in the CSV for names in the circles [default: Component]
+  --colors=<columnName>       Name of the column in the CSV for colors of the circles.
   --outputDir=<path>          Where files should be generated. [default: .]
 
 
@@ -41,6 +43,7 @@ def scatter_plot (cmdline_arguments,
                   y_metric_name,
                   ball_metric_name,
                   entity_column_name,
+                  colors_column_name,
                   ball_size_min,
                   ball_size_max,
                   ball_size_rate):
@@ -62,7 +65,7 @@ def scatter_plot (cmdline_arguments,
             x_values.append(x_metric_value)
             y_values.append(y_metric_value)
             ball_values.append(min(ball_size_max,ball_size_rate * ball_metric_value + ball_size_min))
-            color_values.append(0) #TODO: code a column with colors
+            color_values.append(0 if colors_column_name == "" else hash(row.get(colors_column_name,0)))  # 0 for backwards compatibility
     output_dir = cmdline_arguments["--outputDir"]
     file_prefix = "%s%s%s" % (output_dir, os.sep, "csv")
     file_name = save_scatter(x_values, x_metric_name, y_values, y_metric_name, ball_values, ball_metric_name,
@@ -81,6 +84,7 @@ def main():
                       arguments["--yMetric"],
                       arguments["--ballMetric"],
                       arguments["--entityNames"],
+                      arguments.get("--colors", ""),  # for backwards compatibility on invocation
                       float(arguments["--ballSizeMin"]),
                       float(arguments["--ballSizeMax"]),
                       float(arguments["--ballSizeRate"]),
