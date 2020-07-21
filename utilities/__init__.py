@@ -1,1 +1,1 @@
-VERSION = "0.3.2" # csvscatterplot needs executable
+VERSION = "0.3.3" # csvscatterplot with configurable colors
