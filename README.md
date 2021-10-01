@@ -13,7 +13,7 @@ What It Does
 =============
 You can use srccheck to fail your build (say in Jenkins) if a specific metric goes beyond a threshold you define.
 It could be routine cyclomatic complexity, it could be max number of methods in a class, and so on. Basically any
-[Understand Metric](https://scitools.com/support/metrics_list/) can be used. And it supports many programming
+[Understand Metric](https://support.scitools.com/t/what-metrics-does-understand-have/66) can be used. And it supports many programming
 languages (Java, C++, Python, etc).
 
 NOTE: There is one extra metric that Understand does not have natively but we do support: CountParams, for routines/functions/methods.
