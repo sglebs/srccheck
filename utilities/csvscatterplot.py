@@ -23,7 +23,7 @@ Options:
   --ballSizeMin=<aNumber>     Minimum size of each ball drawn [default: 40]
   --ballSizeMax=<aNumber>     Maximum size of each ball drawn [default: 4000]
   --ballSizeRate=<aNumber>    Rate of growth of the ball for unit of growth of ballMetric [default: 10]
-  --entityNames=<columnName>  Name of the column in the CSV for names in the circles [default: Component]
+  --entityNames=<columnName>  Name(s) of the column(s) in the CSV for names in the circles. Separate with ",". [default: Component]
   --colors=<columnName>       Name of the column in the CSV for colors of the circles.
   --outputDir=<path>          Where files should be generated. [default: .]
 
@@ -67,7 +67,10 @@ def scatter_plot (cmdline_arguments,
             if distance_to_origin < min_dist_to_origin:
                 continue  # skip
             ball_metric_value = float(row.get(ball_metric_name,0))
-            entity_name = row.get(entity_column_name,0)
+            entity_name = ""
+            for entity_column_to_build_name in entity_column_name.split(","):
+                entity_name += row.get(entity_column_to_build_name.strip(),"")
+                entity_name += "   "
             annotations.append(entity_name)
             x_values.append(x_metric_value)
             y_values.append(y_metric_value)
