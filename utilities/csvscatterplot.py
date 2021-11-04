@@ -5,6 +5,7 @@ Usage:
                    [--outputDir=<path to dir where to save files>] \r\n \
                    [--xMetric=<columnName>] \r\n \
                    [--yMetric=<columnName>] \r\n \
+                   [--minDistToOrigin=<dist>] \r\n \
                    [--ballMetric=<columnName>] \r\n \
                    [--entityNames=<columnName>] \r\n \
                    [--colors=<columnName>] \r\n \
@@ -17,6 +18,7 @@ Options:
   --in=<inputCSV>             Input CSV file path. [default: instability.csv]
   --xMetric=<columnName>      Name of the column in the CSV for the x axis [default: Efferent Coupling]
   --yMetric=<columnName>      Name of the column in the CSV for the y axis [default: Afferent Coupling]
+  --minDistToOrigin=<dist>    Min distance to origin for a point to be included in the plot. [default: 0]
   --ballMetric=<columnName>   Name of the column in the CSV for the ball sizes [default: CountLineCode]
   --ballSizeMin=<aNumber>     Minimum size of each ball drawn [default: 40]
   --ballSizeMax=<aNumber>     Maximum size of each ball drawn [default: 4000]
@@ -37,6 +39,7 @@ from docopt import docopt
 from utilities.utils import stream_of_entity_with_metrics, save_scatter
 from utilities import VERSION
 import csv
+from math import sqrt
 
 def scatter_plot (cmdline_arguments,
                   x_metric_name,
@@ -46,7 +49,8 @@ def scatter_plot (cmdline_arguments,
                   colors_column_name,
                   ball_size_min,
                   ball_size_max,
-                  ball_size_rate):
+                  ball_size_rate,
+                  min_dist_to_origin):
 
     annotations = []
     x_values = []
@@ -59,6 +63,9 @@ def scatter_plot (cmdline_arguments,
         for row in reader:
             x_metric_value = float(row.get(x_metric_name,0))
             y_metric_value = float(row.get(y_metric_name,0))
+            distance_to_origin = sqrt(x_metric_value*x_metric_value + y_metric_value*y_metric_value)
+            if distance_to_origin < min_dist_to_origin:
+                continue  # skip
             ball_metric_value = float(row.get(ball_metric_name,0))
             entity_name = row.get(entity_column_name,0)
             annotations.append(entity_name)
@@ -88,6 +95,7 @@ def main():
                       float(arguments["--ballSizeMin"]),
                       float(arguments["--ballSizeMax"]),
                       float(arguments["--ballSizeRate"]),
+                      float(arguments["--minDistToOrigin"]),
                       )
     if not ok:
         print("WARNING/SKIPPING: Could not create plot")
