@@ -69,7 +69,7 @@ def scatter_plot (cmdline_arguments,
             ball_metric_value = float(row.get(ball_metric_name,0))
             entity_name = ""
             for entity_column_to_build_name in entity_column_name.split(","):
-                entity_name += row.get(entity_column_to_build_name.strip(),"")
+                entity_name += row.get(entity_column_to_build_name.strip(),entity_column_to_build_name.strip()) # use the unresolved column name to allow for separators
                 entity_name += "   "
             annotations.append(entity_name)
             x_values.append(x_metric_value)
