@@ -1,1 +1,1 @@
-VERSION = "0.3.4" # csvscatterplot with filtering of points too close to origin, labels from multiple columns.
+VERSION = "0.3.5" # Compat with Python >= 3.8

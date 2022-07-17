@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'docopt>=0.6.2',
         'requests>=2.10.0',
+        'numpy==1.18',  # required version for proper matplotlib compilation in Python 3.8, 3.9, 3.10
         'matplotlib==2.2.4',
         'Jinja2==2.8',
         'mpld3==0.5.1'
