@@ -12,7 +12,8 @@ setup(
     install_requires=[
         'docopt>=0.6.2',
         'requests>=2.10.0',
-        'numpy==1.18',  # required version for proper matplotlib compilation in Python 3.8, 3.9, 3.10
+        'numpy==1.21.3',  # required version for proper matplotlib compilation in Python 3.10
+        'markupsafe==2.0.1'  # because newer ones broke an API that Jinja2 uses in Python 3.9
         'matplotlib==2.2.4',
         'Jinja2==2.8',
         'mpld3==0.5.1'

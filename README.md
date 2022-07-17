@@ -62,6 +62,11 @@ NOTE: you can also break your build using SONAR's [Build Breaker Plugin](https:/
 How to Install srccheck
 =======================
 
+```
+WARNING: Ok under Python 3.8, 3.9. Under 3.10 you will have runtime issues 
+due to the lib versioons we use. Needs upgrading.
+```
+
 If on Windows, do this first:
  * Download install the windows-specific distribution of Mattplotlib 2.2.4 from https://www.lfd.uci.edu/~gohlke/pythonlibs/#matplotlib
    * We tested this with: pip3 install "c:\temp\Downloads\matplotlib-2.2.4-cp37-cp37m-win_amd64.whl"

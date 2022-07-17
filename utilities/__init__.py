@@ -1,1 +1,1 @@
-VERSION = "0.3.5" # Compat with Python >= 3.8
+VERSION = "0.3.6" # Compat with Python3.9
